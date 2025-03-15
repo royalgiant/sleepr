@@ -25,8 +25,8 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="myapp"/>
-        <data android:scheme="com.cqjack.expoappboilerplate"/>
-        <data android:scheme="exp+expo-app-boilerplate"/>
+        <data android:scheme="com.sleeprapp.app"/>
+        <data android:scheme="exp+sleeprapp"/>
       </intent-filter>
     </activity>
   </application>

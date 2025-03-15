@@ -1,4 +1,4 @@
-package com.cqjack.expoappboilerplate
+package com.sleeprapp.app
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

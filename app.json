@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "expo-app-boilerplate",
-    "slug": "expo-app-boilerplate",
+    "name": "sleeprapp",
+    "slug": "sleeprapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cqjack.expoappboilerplate",
+      "bundleIdentifier": "com.sleeprapp.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -20,7 +20,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.cqjack.expoappboilerplate"
+      "package": "com.sleeprapp.app"
     },
     "web": {
       "bundler": "metro",

@@ -1,4 +1,4 @@
-package com.cqjack.expoappboilerplate
+package com.sleeprapp.app
 
 import android.app.Application
 import android.content.res.Configuration
