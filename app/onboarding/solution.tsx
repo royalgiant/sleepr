@@ -3,14 +3,24 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useSuperwall } from '@/hooks/useSuperwall';
+import { useOnboarding } from '@/contexts/OnboardingContext';
+import { SUPERWALL_TRIGGERS } from '@/config/superwall';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function SolutionScreen() {
+  const { showPaywall } = useSuperwall();
+  const { setIsOnboarded } = useOnboarding();
   const router = useRouter();
 
-  const handleNext = () => {
-    router.push('/onboarding/features');
+  const handleGetStarted = async () => {
+    try {
+      await showPaywall(SUPERWALL_TRIGGERS.ONBOARDING);
+      setIsOnboarded(true);
+    } catch (error) {
+      console.error('Failed to show paywall:', error);
+    }
   };
 
   return (
@@ -57,7 +67,7 @@ export default function SolutionScreen() {
         </ScrollView>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={handleNext}>
+          <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
             <ThemedText type="defaultSemiBold" style={styles.buttonText}>
               Show Me How!
             </ThemedText>
