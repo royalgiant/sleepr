@@ -5,6 +5,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function WelcomeScreen() {
@@ -20,13 +21,15 @@ export default function WelcomeScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
           <View style={styles.main}>
-            <MaterialCommunityIcons name="star" size={64} color="#0A7EA4" />
+            <Image 
+              source={require('../../assets/images/AppIcons/Assets.xcassets/AppIcon.appiconset/100.png')}
+            />
             <ThemedText type="title" style={styles.title}>
-              Your App Name
+              Sleepr
             </ThemedText>
             <View style={styles.subtitleContainer}>
               <ThemedText style={styles.subtitle}>
-                A short, compelling tagline that captures your app's value
+                Your Sleep Habit Companion for Better Sleep
               </ThemedText>
             </View>
           </View>
@@ -65,6 +68,7 @@ const styles = StyleSheet.create({
     fontSize: 36,
     textAlign: 'center',
     paddingHorizontal: 16,
+    paddingTop: 4
   },
   subtitleContainer: {
     paddingHorizontal: 32,
@@ -76,7 +80,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   button: {
-    backgroundColor: '#0A7EA4',
+    backgroundColor: '#8A7FBA',
     padding: 20,
     borderRadius: 16,
     alignItems: 'center',

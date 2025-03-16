@@ -23,40 +23,40 @@ export default function ProblemScreen() {
         >
           <View style={styles.header}>
             <ThemedText type="title" style={styles.title}>
-              The Problem
-            </ThemedText>
-            <ThemedText style={styles.description}>
-              Describe the main challenge or pain point your users face. Make it relatable and specific.
+              Is this You?
             </ThemedText>
           </View>
 
           <View style={styles.content}>
             <View style={styles.example}>
-              <MaterialCommunityIcons name="alert-circle" size={32} color="#0A7EA4" />
+              <MaterialCommunityIcons name="alert-circle" size={32} color="#F4A896" />
               <ThemedText style={styles.exampleText}>
-                "I struggle with X every day, and it costs me Y hours per week..."
+                "I have trouble falling asleep and wake up feeling tired every day. It makes me grumpy and unfocused."
               </ThemedText>
             </View>
-
-            <View style={styles.points}>
-              <View style={styles.point}>
-                <MaterialCommunityIcons name="close" size={24} color="#E11D48" />
-                <ThemedText style={styles.pointText}>
-                  Current solutions are expensive and complex
-                </ThemedText>
-              </View>
-              <View style={styles.point}>
-                <MaterialCommunityIcons name="close" size={24} color="#E11D48" />
-                <ThemedText style={styles.pointText}>
-                  Users waste time on manual workarounds
-                </ThemedText>
-              </View>
-              <View style={styles.point}>
-                <MaterialCommunityIcons name="close" size={24} color="#E11D48" />
-                <ThemedText style={styles.pointText}>
-                  Existing tools lack key features
-                </ThemedText>
-              </View>
+            <View style={styles.example}>
+              <MaterialCommunityIcons name="alert-circle" size={32} color="#F4A896" />
+              <ThemedText style={styles.exampleText}>
+                "I can’t stick to a regular bedtime, and it messes up my whole day."
+              </ThemedText>
+            </View>
+            <View style={styles.example}>
+              <MaterialCommunityIcons name="alert-circle" size={32} color="#F4A896" />
+              <ThemedText style={styles.exampleText}>
+                "When I don’t sleep well, I feel tired, cranky, and can’t focus at school or work."
+              </ThemedText>
+            </View>
+            <View style={styles.example}>
+              <MaterialCommunityIcons name="alert-circle" size={32} color="#F4A896" />
+              <ThemedText style={styles.exampleText}>
+                "I spend too much time on my phone before bed, and it keeps me awake.."
+              </ThemedText>
+            </View>
+            <View style={styles.example}>
+              <MaterialCommunityIcons name="alert-circle" size={32} color="#F4A896" />
+              <ThemedText style={styles.exampleText}>
+                "I’ve tried a lot of sleep apps, but none of them really help me sleep better"
+              </ThemedText>
             </View>
           </View>
         </ScrollView>
@@ -64,7 +64,7 @@ export default function ProblemScreen() {
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleNext}>
             <ThemedText type="defaultSemiBold" style={styles.buttonText}>
-              See the Solution
+              Yes! That's me!
             </ThemedText>
           </TouchableOpacity>
         </View>
@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 36,
+    paddingTop: 4
   },
   description: {
     fontSize: 16,
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   example: {
-    backgroundColor: '#0A7EA410',
+    backgroundColor: '#F4A89610',
     padding: 16,
     borderRadius: 16,
     flexDirection: 'row',
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   button: {
-    backgroundColor: '#0A7EA4',
+    backgroundColor: '#8A7FBA',
     padding: 16,
     borderRadius: 16,
     alignItems: 'center',

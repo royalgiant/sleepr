@@ -22,38 +22,35 @@ export default function SolutionScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <MaterialCommunityIcons name="lightbulb-on" size={48} color="#0A7EA4" />
+            <MaterialCommunityIcons name="lightbulb-on" size={48} color="#A2D9C3" />
             <ThemedText type="title" style={styles.title}>
-              Introducing a Better Way
+              A Better Way to Sleep
             </ThemedText>
           </View>
 
           <View style={styles.mainFeature}>
             <ThemedText type="defaultSemiBold" style={styles.mainTitle}>
-              Your App's Core Value
-            </ThemedText>
-            <ThemedText style={styles.mainDescription}>
-              One clear, powerful sentence that explains exactly how you solve the user's problem.
+              Sleep better, feel better, and crush every day!
             </ThemedText>
           </View>
 
           <View style={styles.benefits}>
             <View style={styles.benefit}>
-              <MaterialCommunityIcons name="check-circle" size={24} color="#0A7EA4" />
+              <MaterialCommunityIcons name="check-circle" size={24} color="#A2D9C3" />
               <ThemedText style={styles.benefitText}>
-                Key benefit or feature that solves their pain
+                Build 3 simple habits that'll change your sleep for better – forever
               </ThemedText>
             </View>
             <View style={styles.benefit}>
-              <MaterialCommunityIcons name="check-circle" size={24} color="#0A7EA4" />
+              <MaterialCommunityIcons name="check-circle" size={24} color="#A2D9C3" />
               <ThemedText style={styles.benefitText}>
-                Another important advantage of your solution
+                Get reminders to stay on track and avoid sleep disruptors.
               </ThemedText>
             </View>
             <View style={styles.benefit}>
-              <MaterialCommunityIcons name="check-circle" size={24} color="#0A7EA4" />
+              <MaterialCommunityIcons name="check-circle" size={24} color="#A2D9C3" />
               <ThemedText style={styles.benefitText}>
-                A third compelling reason to use your app
+              Reduce risks of heart disease, diabetes, alzheimer’s, dementia and other health issues – ALL SLEEP-RELATED.
               </ThemedText>
             </View>
           </View>
@@ -62,7 +59,7 @@ export default function SolutionScreen() {
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleNext}>
             <ThemedText type="defaultSemiBold" style={styles.buttonText}>
-              Show Me How
+              Show Me How!
             </ThemedText>
           </TouchableOpacity>
         </View>
@@ -96,7 +93,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   mainFeature: {
-    backgroundColor: '#0A7EA410',
+    backgroundColor: '#A2D9C310',
     padding: 24,
     borderRadius: 20,
     gap: 8,
@@ -118,13 +115,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: '#0A7EA408',
+    backgroundColor: '#A2D9C308',
     padding: 16,
     borderRadius: 12,
   },
   benefitText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     lineHeight: 22,
   },
   buttonContainer: {
@@ -132,7 +129,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   button: {
-    backgroundColor: '#0A7EA4',
+    backgroundColor: '#8A7FBA',
     padding: 20,
     borderRadius: 16,
     alignItems: 'center',
