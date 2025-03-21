@@ -26,11 +26,7 @@ export default function SolutionScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView 
-          style={styles.scroll} 
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
+        
           <View style={styles.header}>
             <MaterialCommunityIcons name="lightbulb-on" size={48} color="#A2D9C3" />
             <ThemedText type="title" style={styles.title}>
@@ -64,7 +60,6 @@ export default function SolutionScreen() {
               </ThemedText>
             </View>
           </View>
-        </ScrollView>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
