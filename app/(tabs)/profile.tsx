@@ -1,4 +1,5 @@
-import { StyleSheet, Platform, View, Modal } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import { StyleSheet, Platform, View, Modal, Alert, Linking } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect } from 'react';
@@ -12,6 +13,89 @@ import { Colors } from '@/constants/Colors';
 export default function SettingsScreen() {
   const [bedtime, setBedtime] = useState<Date>(new Date()); // Default bedtime to now
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+  
+  // Function to request notification permissions
+  const requestNotificationPermissions = async () => {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('bedtime-reminders', {
+        name: 'Bedtime Reminders',
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+  
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') {
+      setShowPermissionPrompt(true); // Show prompt if permission is denied
+      return false;
+    }
+    setShowPermissionPrompt(false); // Hide prompt if permission is granted
+    return true;
+  };
+
+  // Function to schedule bedtime notifications
+  const scheduleBedtimeNotifications = async (bedtime: Date) => {
+    // Cancel any existing scheduled notifications to avoid duplicates
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    // Calculate times for notifications
+    const windDownTime = new Date(bedtime);
+    windDownTime.setHours(bedtime.getHours() - 1); // 1 hour before bedtime
+    windDownTime.setMinutes(bedtime.getMinutes());
+
+    const tempTime = new Date(bedtime);
+    tempTime.setMinutes(bedtime.getMinutes() - 30); // 30 minutes before bedtime
+
+    // Get the current time to determine if we need to schedule for today or tomorrow
+    const now = new Date();
+    const scheduleForTomorrow = (time: Date) =>
+      now.getHours() > time.getHours() ||
+      (now.getHours() === time.getHours() && now.getMinutes() > time.getMinutes());
+
+    // Schedule Wind Down Notification (1 hour before bedtime)
+    const windDownTrigger = new Date(now);
+    windDownTrigger.setHours(windDownTime.getHours());
+    windDownTrigger.setMinutes(windDownTime.getMinutes());
+    windDownTrigger.setSeconds(0);
+    if (scheduleForTomorrow(windDownTime)) {
+      windDownTrigger.setDate(windDownTrigger.getDate() + 1);
+    }
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Time to Wind Down',
+        body: 'Start winding down and avoid blue light to prepare for bed.',
+      },
+      trigger: windDownTrigger,
+    });
+
+    // Schedule Room Temperature Notification (30 minutes before bedtime)
+    const tempTrigger = new Date(now);
+    tempTrigger.setHours(tempTime.getHours());
+    tempTrigger.setMinutes(tempTime.getMinutes());
+    tempTrigger.setSeconds(0);
+    if (scheduleForTomorrow(tempTime)) {
+      tempTrigger.setDate(tempTrigger.getDate() + 1);
+    }
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Prepare Your Room',
+        body: 'Set your room temperature to 60-67°F / 15-19°C for optimal sleep.',
+      },
+      trigger: tempTrigger,
+    });
+  };
 
   // Load the saved bedtime from AsyncStorage when the component mounts
   useEffect(() => {
@@ -19,7 +103,12 @@ export default function SettingsScreen() {
       try {
         const savedBedtime = await AsyncStorage.getItem('bedtime');
         if (savedBedtime) {
-          setBedtime(new Date(savedBedtime));
+          const bedtimeDate = new Date(savedBedtime);
+          setBedtime(bedtimeDate);
+          const hasPermission = await requestNotificationPermissions();
+          if (hasPermission) {
+            await scheduleBedtimeNotifications(bedtimeDate);
+          }
         } else {
           // Default bedtime if none is set
           const defaultBedtime = new Date();
@@ -45,9 +134,21 @@ export default function SettingsScreen() {
     saveBedtime();
   }, [bedtime]);
 
-  const onChangeTime = (event: any, selectedTime?: Date) => {
-    // On iOS, we keep the modal open until the user presses "Done"
-    // On Android, we close the picker after selection
+  useEffect(() => {
+    const subscription = Notifications.addNotificationReceivedListener(async () => {
+      // Reschedule notifications for the next day
+      const savedBedtime = await AsyncStorage.getItem('bedtime');
+      if (savedBedtime) {
+        const hasPermission = await requestNotificationPermissions();
+        if (hasPermission) {
+          await scheduleBedtimeNotifications(new Date(savedBedtime));
+        }
+      }
+    });
+    return () => subscription.remove();
+  }, []);
+
+  const onChangeTime = async (event: any, selectedTime?: Date) => {
     if (Platform.OS === 'android') {
       setShowTimePicker(false);
     }
@@ -57,9 +158,14 @@ export default function SettingsScreen() {
       const newBedtime = new Date(today);
       newBedtime.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
       setBedtime(newBedtime);
+  
+      // Schedule notifications after updating bedtime
+      const hasPermission = await requestNotificationPermissions();
+      if (hasPermission) {
+        await scheduleBedtimeNotifications(newBedtime);
+      }
     }
   };
-
   const formatTime = (date: Date) => {
     const hours = date.getHours();
     const minutes = date.getMinutes();
@@ -76,7 +182,7 @@ export default function SettingsScreen() {
       <ThemedView style={styles.titleContainer}>
         <ThemedText type="title">Settings</ThemedText>
       </ThemedView>
-
+  
       <ThemedView style={styles.section}>
         <ThemedText type="subtitle">Bedtime</ThemedText>
         <TouchableOpacity
@@ -86,7 +192,39 @@ export default function SettingsScreen() {
           <ThemedText>{formatTime(bedtime)}</ThemedText>
         </TouchableOpacity>
       </ThemedView>
-
+  
+      {showPermissionPrompt && (
+        <ThemedView style={styles.permissionPrompt}>
+          <ThemedText style={styles.permissionText}>
+            Notifications are required for bedtime reminders. Please enable them to receive alerts.
+          </ThemedText>
+          <TouchableOpacity
+            style={styles.permissionButton}
+            onPress={async () => {
+              const hasPermission = await requestNotificationPermissions();
+              if (hasPermission) {
+                await scheduleBedtimeNotifications(bedtime);
+              } else {
+                // If denied again, offer to open settings
+                Alert.alert(
+                  'Enable Notifications',
+                  'You can enable notifications in your device settings.',
+                  [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                      text: 'Open Settings',
+                      onPress: () => Linking.openSettings(), // Opens device settings
+                    },
+                  ]
+                );
+              }
+            }}
+          >
+            <ThemedText style={styles.permissionButtonText}>Enable Notifications</ThemedText>
+          </TouchableOpacity>
+        </ThemedView>
+      )}
+  
       {showTimePicker && (
         Platform.OS === 'ios' ? (
           <Modal
@@ -102,7 +240,7 @@ export default function SettingsScreen() {
                   mode="time"
                   display="spinner"
                   onChange={onChangeTime}
-                  textColor={Colors.light.text} // Ensure text is visible in dark mode
+                  textColor={Colors.light.text}
                 />
                 <TouchableOpacity
                   style={styles.doneButton}
@@ -167,6 +305,30 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   doneButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  permissionPrompt: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: '#FFF3CD', // Light yellow background for alert
+    borderRadius: 8,
+    alignItems: 'center',
+    marginHorizontal: 16,
+  },
+  permissionText: {
+    textAlign: 'center',
+    marginBottom: 8,
+    color: '#856404', // Dark yellow text for contrast
+  },
+  permissionButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: Colors.light.tint,
+    alignItems: 'center',
+  },
+  permissionButtonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
