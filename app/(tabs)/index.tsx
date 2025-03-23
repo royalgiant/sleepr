@@ -21,6 +21,7 @@ export default function HomeScreen() {
   const [lastCompletionDate, setLastCompletionDate] = useState<string | null>(null);
   const [isDayCompleted, setIsDayCompleted] = useState(false);
   const [bedtime, setBedtime] = useState<Date | null>(null);
+  const [blueLightMinutes, setBlueLightMinutes] = useState<number>(60);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempDate, setTempDate] = useState<Date>(new Date());
 
@@ -31,6 +32,7 @@ export default function HomeScreen() {
       const savedStreak = await AsyncStorage.getItem('streak');
       const savedCompletionDate = await AsyncStorage.getItem('lastCompletionDate');
       const savedBedtime = await AsyncStorage.getItem('bedtime');
+      const savedBlueLightMinutes = await AsyncStorage.getItem('blueLightMinutes');
 
       if (savedHabits) {
         setHabits(JSON.parse(savedHabits));
@@ -50,6 +52,9 @@ export default function HomeScreen() {
         defaultBedtime.setHours(22, 0, 0, 0); // Default to 10:00 PM
         setBedtime(defaultBedtime);
       }
+      if (savedBlueLightMinutes) {
+        setBlueLightMinutes(parseInt(savedBlueLightMinutes));
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     }
@@ -63,17 +68,21 @@ export default function HomeScreen() {
   // Reload bedtime when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      const loadBedtime = async () => {
+      const loadSettings = async () => {
         try {
           const savedBedtime = await AsyncStorage.getItem('bedtime');
+          const savedBlueLightMinutes = await AsyncStorage.getItem('blueLightMinutes');
           if (savedBedtime) {
             setBedtime(new Date(savedBedtime));
           }
+          if (savedBlueLightMinutes) {
+            setBlueLightMinutes(parseInt(savedBlueLightMinutes));
+          }
         } catch (error) {
-          console.error('Error loading bedtime on focus:', error);
+          console.error('Error loading settings on focus:', error);
         }
       };
-      loadBedtime();
+      loadSettings();
     }, [])
   );
 
@@ -274,7 +283,7 @@ export default function HomeScreen() {
               {habits.avoidBlueLight && <View style={styles.checkboxFill} />}
             </View>
             <ThemedText style={isDayCompleted && styles.disabledText}>
-              Avoided bluelight (no phones, tablets, bright lights 1 hour before bed)
+              Avoided bluelight (no phones, tablets, bright lights {blueLightMinutes} mins before bed)
             </ThemedText>
           </TouchableOpacity>
 

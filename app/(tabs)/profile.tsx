@@ -3,7 +3,7 @@ import { StyleSheet, Platform, View, Modal, Alert, Linking, Switch } from 'react
 import { Picker } from '@react-native-picker/picker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -12,29 +12,35 @@ import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 
 export default function SettingsScreen() {
-  const [bedtime, setBedtime] = useState<Date>(new Date()); // Default bedtime to now
+  const [bedtime, setBedtime] = useState<Date>(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
 
   // State for Avoid Blue Light Reminder (now only minutes, 0 to 60)
   const [blueLightReminder, setBlueLightReminder] = useState(false);
-  const [blueLightMinutes, setBlueLightMinutes] = useState(60); // Default to 60 minutes
+  const [blueLightMinutes, setBlueLightMinutes] = useState(60);
   const [showBlueLightPicker, setShowBlueLightPicker] = useState(false);
 
   // State for Room Temperature Reminder (already minutes-only, unchanged)
   const [roomTempReminder, setRoomTempReminder] = useState(false);
-  const [roomTempMinutes, setRoomTempMinutes] = useState(15); // Default to 15 minutes
+  const [roomTempMinutes, setRoomTempMinutes] = useState(15);
   const [showRoomTempPicker, setShowRoomTempPicker] = useState(false);
 
-  // State for Avoid Caffeine, Nicotine, Alcohol Reminder (now only hours, 1 to 12)
+  // State for Avoid Caffeine, Nicotine, Alcohol Reminder (now hours, 0 to 12)
   const [avoidCaffeineReminder, setAvoidCaffeineReminder] = useState(false);
-  const [avoidCaffeineHours, setAvoidCaffeineHours] = useState(6); // Default to 6 hours
+  const [avoidCaffeineHours, setAvoidCaffeineHours] = useState(6);
   const [showAvoidCaffeinePicker, setShowAvoidCaffeinePicker] = useState(false);
 
-  // State for Avoid Late Night Eating Reminder (now only hours, 1 to 12)
+  // State for Avoid Late Night Eating Reminder (now hours, 0 to 12)
   const [avoidLateEatingReminder, setAvoidLateEatingReminder] = useState(false);
-  const [avoidLateEatingHours, setAvoidLateEatingHours] = useState(3); // Default to 3 hours
-  const [showAvoidLateEatingPicker, setShowAvoidLateEatingPicker] = useState(false);
+  const [avoidLateEatingHours, setAvoidLateEatingHours] = useState(3);
+  const [showAvoidLateEatingPicker, setShowAvoidLateEatingPicker] = useState(false)
+
+  // State for Did Wind-Down Routine (boolean toggle)
+  const [didWindDownRoutine, setDidWindDownRoutine] = useState(false);
+
+  // Debounce ref for scheduling
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -69,14 +75,19 @@ export default function SettingsScreen() {
     await Notifications.cancelAllScheduledNotificationsAsync();
 
     const now = new Date();
-    const scheduleForTomorrow = (time: Date) =>
-      now.getHours() > time.getHours() ||
-      (now.getHours() === time.getHours() && now.getMinutes() > time.getMinutes());
+    const scheduleForTomorrow = (time: Date) => {
+      const nowTime = now.getTime();
+      const targetTime = new Date(now);
+      targetTime.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), 0);
+      const timeDifference = nowTime - targetTime.getTime();
+      return timeDifference > 60000; // 60 seconds
+    };
 
     // Wind Down Notification (1 hour before bedtime)
     const windDownTime = new Date(bedtime);
     windDownTime.setHours(bedtime.getHours() - 1);
     windDownTime.setMinutes(bedtime.getMinutes());
+    windDownTime.setSeconds(0);
 
     const windDownTrigger = new Date(now);
     windDownTrigger.setHours(windDownTime.getHours());
@@ -86,21 +97,23 @@ export default function SettingsScreen() {
       windDownTrigger.setDate(windDownTrigger.getDate() + 1);
     }
 
+    console.log('Wind Down Notification scheduled for:', windDownTrigger.toLocaleString());
+
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Time to Wind Down',
         body: 'Start winding down and avoid blue light to prepare for bed.',
       },
       trigger: {
-        type: 'date',
-        timestamp: windDownTrigger.getTime(),
+        date: windDownTrigger,
       },
     });
 
-    // Avoid Blue Light Reminder (now only minutes)
+    // Avoid Blue Light Reminder
     if (blueLightReminder) {
       const blueLightTime = new Date(bedtime);
       blueLightTime.setMinutes(bedtime.getMinutes() - blueLightMinutes);
+      blueLightTime.setSeconds(0);
 
       const blueLightTrigger = new Date(now);
       blueLightTrigger.setHours(blueLightTime.getHours());
@@ -110,22 +123,24 @@ export default function SettingsScreen() {
         blueLightTrigger.setDate(blueLightTrigger.getDate() + 1);
       }
 
+      console.log('Avoid Blue Light Notification scheduled for:', blueLightTrigger.toLocaleString());
+
       await Notifications.scheduleNotificationAsync({
         content: {
           title: 'Avoid Blue Light',
           body: 'Stop using screens to reduce blue light exposure before bed.',
         },
         trigger: {
-          type: 'date',
-          timestamp: blueLightTrigger.getTime(),
+          date: blueLightTrigger,
         },
       });
     }
 
-    // Room Temperature Reminder (unchanged)
+    // Room Temperature Reminder
     if (roomTempReminder) {
       const tempTime = new Date(bedtime);
       tempTime.setMinutes(bedtime.getMinutes() - roomTempMinutes);
+      tempTime.setSeconds(0);
 
       const tempTrigger = new Date(now);
       tempTrigger.setHours(tempTime.getHours());
@@ -135,22 +150,24 @@ export default function SettingsScreen() {
         tempTrigger.setDate(tempTrigger.getDate() + 1);
       }
 
+      console.log('Room Temperature Notification scheduled for:', tempTrigger.toLocaleString());
+
       await Notifications.scheduleNotificationAsync({
         content: {
           title: 'Prepare Your Room',
           body: 'Set your room temperature to 60-67°F / 15-19°C for optimal sleep.',
         },
         trigger: {
-          type: 'date',
-          timestamp: tempTrigger.getTime(),
+          date: tempTrigger,
         },
       });
     }
 
-    // Avoid Caffeine, Nicotine, Alcohol Reminder (now only hours)
-    if (avoidCaffeineReminder) {
+    // Avoid Caffeine, Nicotine, Alcohol Reminder
+    if (avoidCaffeineReminder && avoidCaffeineHours > 0) {
       const avoidCaffeineTime = new Date(bedtime);
       avoidCaffeineTime.setHours(bedtime.getHours() - avoidCaffeineHours);
+      avoidCaffeineTime.setSeconds(0);
 
       const avoidCaffeineTrigger = new Date(now);
       avoidCaffeineTrigger.setHours(avoidCaffeineTime.getHours());
@@ -160,22 +177,24 @@ export default function SettingsScreen() {
         avoidCaffeineTrigger.setDate(avoidCaffeineTrigger.getDate() + 1);
       }
 
+      console.log('Avoid Caffeine Notification scheduled for:', avoidCaffeineTrigger.toLocaleString());
+
       await Notifications.scheduleNotificationAsync({
         content: {
           title: 'Avoid Caffeine, Nicotine, Alcohol',
           body: 'Avoid consuming caffeine, nicotine, or alcohol to improve sleep quality.',
         },
         trigger: {
-          type: 'date',
-          timestamp: avoidCaffeineTrigger.getTime(),
+          date: avoidCaffeineTrigger,
         },
       });
     }
 
-    // Avoid Late Night Eating Reminder (now only hours)
-    if (avoidLateEatingReminder) {
+    // Avoid Late Night Eating Reminder
+    if (avoidLateEatingReminder && avoidLateEatingHours > 0) {
       const avoidLateEatingTime = new Date(bedtime);
       avoidLateEatingTime.setHours(bedtime.getHours() - avoidLateEatingHours);
+      avoidLateEatingTime.setSeconds(0);
 
       const avoidLateEatingTrigger = new Date(now);
       avoidLateEatingTrigger.setHours(avoidLateEatingTime.getHours());
@@ -185,16 +204,137 @@ export default function SettingsScreen() {
         avoidLateEatingTrigger.setDate(avoidLateEatingTrigger.getDate() + 1);
       }
 
+      console.log('Avoid Late Night Eating Notification scheduled for:', avoidLateEatingTrigger.toLocaleString());
+
       await Notifications.scheduleNotificationAsync({
         content: {
           title: 'Avoid Late Night Eating',
           body: 'Stop eating to allow your body to prepare for sleep.',
         },
         trigger: {
-          type: 'date',
-          timestamp: avoidLateEatingTrigger.getTime(),
+          date: avoidLateEatingTrigger,
         },
       });
+    }
+  };
+
+  // Function to check and fire notifications immediately if the time matches
+  const checkAndFireNotifications = () => {
+    const now = new Date();
+    const nowTime = now.getTime();
+
+    // Wind Down Notification (1 hour before bedtime)
+    const windDownTime = new Date(bedtime);
+    windDownTime.setHours(bedtime.getHours() - 1);
+    windDownTime.setMinutes(bedtime.getMinutes());
+    windDownTime.setSeconds(0);
+
+    const windDownTrigger = new Date(now);
+    windDownTrigger.setHours(windDownTime.getHours());
+    windDownTrigger.setMinutes(windDownTime.getMinutes());
+    windDownTrigger.setSeconds(0);
+    const windDownTimeMs = windDownTrigger.getTime();
+    if (nowTime >= windDownTimeMs && nowTime - windDownTimeMs <= 60000) {
+      console.log('Firing Wind Down Notification immediately');
+      Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Time to Wind Down',
+          body: 'Start winding down and avoid blue light to prepare for bed.',
+        },
+        trigger: null,
+      });
+    }
+
+    // Avoid Blue Light Reminder
+    if (blueLightReminder) {
+      const blueLightTime = new Date(bedtime);
+      blueLightTime.setMinutes(bedtime.getMinutes() - blueLightMinutes);
+      blueLightTime.setSeconds(0);
+
+      const blueLightTrigger = new Date(now);
+      blueLightTrigger.setHours(blueLightTime.getHours());
+      blueLightTrigger.setMinutes(blueLightTime.getMinutes());
+      blueLightTrigger.setSeconds(0);
+      const blueLightTimeMs = blueLightTrigger.getTime();
+      if (nowTime >= blueLightTimeMs && nowTime - blueLightTimeMs <= 60000) {
+        console.log('Firing Avoid Blue Light Notification immediately');
+        Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Avoid Blue Light',
+            body: 'Stop using screens to reduce blue light exposure before bed.',
+          },
+          trigger: null,
+        });
+      }
+    }
+
+    // Room Temperature Reminder
+    if (roomTempReminder) {
+      const tempTime = new Date(bedtime);
+      tempTime.setMinutes(bedtime.getMinutes() - roomTempMinutes);
+      tempTime.setSeconds(0);
+
+      const tempTrigger = new Date(now);
+      tempTrigger.setHours(tempTime.getHours());
+      tempTrigger.setMinutes(tempTime.getMinutes());
+      tempTrigger.setSeconds(0);
+      const tempTimeMs = tempTrigger.getTime();
+      if (nowTime >= tempTimeMs && nowTime - tempTimeMs <= 60000) {
+        console.log('Firing Room Temperature Notification immediately');
+        Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Prepare Your Room',
+            body: 'Set your room temperature to 60-67°F / 15-19°C for optimal sleep.',
+          },
+          trigger: null,
+        });
+      }
+    }
+
+    // Avoid Caffeine, Nicotine, Alcohol Reminder
+    if (avoidCaffeineReminder && avoidCaffeineHours > 0) {
+      const avoidCaffeineTime = new Date(bedtime);
+      avoidCaffeineTime.setHours(bedtime.getHours() - avoidCaffeineHours);
+      avoidCaffeineTime.setSeconds(0);
+
+      const avoidCaffeineTrigger = new Date(now);
+      avoidCaffeineTrigger.setHours(avoidCaffeineTime.getHours());
+      avoidCaffeineTrigger.setMinutes(avoidCaffeineTime.getMinutes());
+      avoidCaffeineTrigger.setSeconds(0);
+      const avoidCaffeineTimeMs = avoidCaffeineTrigger.getTime();
+      if (nowTime >= avoidCaffeineTimeMs && nowTime - avoidCaffeineTimeMs <= 60000) {
+        console.log('Firing Avoid Caffeine Notification immediately');
+        Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Avoid Caffeine, Nicotine, Alcohol',
+            body: 'Avoid consuming caffeine, nicotine, or alcohol to improve sleep quality.',
+          },
+          trigger: null,
+        });
+      }
+    }
+
+    // Avoid Late Night Eating Reminder
+    if (avoidLateEatingReminder && avoidLateEatingHours > 0) {
+      const avoidLateEatingTime = new Date(bedtime);
+      avoidLateEatingTime.setHours(bedtime.getHours() - avoidLateEatingHours);
+      avoidLateEatingTime.setSeconds(0);
+
+      const avoidLateEatingTrigger = new Date(now);
+      avoidLateEatingTrigger.setHours(avoidLateEatingTime.getHours());
+      avoidLateEatingTrigger.setMinutes(avoidLateEatingTime.getMinutes());
+      avoidLateEatingTrigger.setSeconds(0);
+      const avoidLateEatingTimeMs = avoidLateEatingTrigger.getTime();
+      if (nowTime >= avoidLateEatingTimeMs && nowTime - avoidLateEatingTimeMs <= 60000) {
+        console.log('Firing Avoid Late Night Eating Notification immediately');
+        Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Avoid Late Night Eating',
+            body: 'Stop eating to allow your body to prepare for sleep.',
+          },
+          trigger: null,
+        });
+      }
     }
   };
 
@@ -202,50 +342,81 @@ export default function SettingsScreen() {
   useEffect(() => {
     const loadSettings = async () => {
       try {
+        // Load bedtime
         const savedBedtime = await AsyncStorage.getItem('bedtime');
-        if (savedBedtime) {
+        if (savedBedtime !== null) {
           const bedtimeDate = new Date(savedBedtime);
           setBedtime(bedtimeDate);
-          const hasPermission = await requestNotificationPermissions();
-          if (hasPermission) {
-            await scheduleBedtimeNotifications(bedtimeDate);
-          }
         } else {
           const defaultBedtime = new Date();
           defaultBedtime.setHours(22, 0, 0, 0);
           setBedtime(defaultBedtime);
         }
 
-        // Load Blue Light Reminder settings (now only minutes)
+        // Load Blue Light Reminder settings
         const savedBlueLightReminder = await AsyncStorage.getItem('blueLightReminder');
-        if (savedBlueLightReminder) {
+        if (savedBlueLightReminder !== null) {
           setBlueLightReminder(JSON.parse(savedBlueLightReminder));
-          const savedBlueLightMinutes = await AsyncStorage.getItem('blueLightMinutes');
-          if (savedBlueLightMinutes) setBlueLightMinutes(parseInt(savedBlueLightMinutes));
+        }
+        const savedBlueLightMinutes = await AsyncStorage.getItem('blueLightMinutes');
+        if (savedBlueLightMinutes !== null) {
+          setBlueLightMinutes(parseInt(savedBlueLightMinutes));
         }
 
-        // Load Room Temperature Reminder settings (unchanged)
+        // Load Room Temperature Reminder settings
         const savedRoomTempReminder = await AsyncStorage.getItem('roomTempReminder');
-        if (savedRoomTempReminder) {
+        if (savedRoomTempReminder !== null) {
           setRoomTempReminder(JSON.parse(savedRoomTempReminder));
-          const savedRoomTempMinutes = await AsyncStorage.getItem('roomTempMinutes');
-          if (savedRoomTempMinutes) setRoomTempMinutes(parseInt(savedRoomTempMinutes));
+        }
+        const savedRoomTempMinutes = await AsyncStorage.getItem('roomTempMinutes');
+        if (savedRoomTempMinutes !== null) {
+          setRoomTempMinutes(parseInt(savedRoomTempMinutes));
         }
 
-        // Load Avoid Caffeine Reminder settings (now only hours)
+        // Load Avoid Caffeine Reminder settings
         const savedAvoidCaffeineReminder = await AsyncStorage.getItem('avoidCaffeineReminder');
-        if (savedAvoidCaffeineReminder) {
+        if (savedAvoidCaffeineReminder !== null) {
           setAvoidCaffeineReminder(JSON.parse(savedAvoidCaffeineReminder));
-          const savedAvoidCaffeineHours = await AsyncStorage.getItem('avoidCaffeineHours');
-          if (savedAvoidCaffeineHours) setAvoidCaffeineHours(parseInt(savedAvoidCaffeineHours));
+        }
+        const savedAvoidCaffeineHours = await AsyncStorage.getItem('avoidCaffeineHours');
+        if (savedAvoidCaffeineHours !== null) {
+          setAvoidCaffeineHours(parseInt(savedAvoidCaffeineHours));
         }
 
-        // Load Avoid Late Night Eating Reminder settings (now only hours)
+        // Load Avoid Late Night Eating Reminder settings
         const savedAvoidLateEatingReminder = await AsyncStorage.getItem('avoidLateEatingReminder');
-        if (savedAvoidLateEatingReminder) {
+        if (savedAvoidLateEatingReminder !== null) {
           setAvoidLateEatingReminder(JSON.parse(savedAvoidLateEatingReminder));
-          const savedAvoidLateEatingHours = await AsyncStorage.getItem('avoidLateEatingHours');
-          if (savedAvoidLateEatingHours) setAvoidLateEatingHours(parseInt(savedAvoidLateEatingHours));
+        }
+        const savedAvoidLateEatingHours = await AsyncStorage.getItem('avoidLateEatingHours');
+        if (savedAvoidLateEatingHours !== null) {
+          setAvoidLateEatingHours(parseInt(savedAvoidLateEatingHours));
+        }
+
+        // Load Did Wind-Down Routine setting
+        const savedDidWindDownRoutine = await AsyncStorage.getItem('didWindDownRoutine');
+        if (savedDidWindDownRoutine !== null) {
+          setDidWindDownRoutine(JSON.parse(savedDidWindDownRoutine));
+        }
+
+        // Log loaded values for debugging
+        console.log('Loaded settings:', {
+          bedtime: savedBedtime,
+          blueLightReminder: savedBlueLightReminder,
+          blueLightMinutes: savedBlueLightMinutes,
+          roomTempReminder: savedRoomTempReminder,
+          roomTempMinutes: savedRoomTempMinutes,
+          avoidCaffeineReminder: savedAvoidCaffeineReminder,
+          avoidCaffeineHours: savedAvoidCaffeineHours,
+          avoidLateEatingReminder: savedAvoidLateEatingReminder,
+          avoidLateEatingHours: savedAvoidLateEatingHours,
+          didWindDownRoutine: savedDidWindDownRoutine,
+        });
+
+        // Schedule notifications after loading settings
+        const hasPermission = await requestNotificationPermissions();
+        if (hasPermission) {
+          await scheduleBedtimeNotifications(bedtime);
         }
       } catch (error) {
         console.error('Error loading settings:', error);
@@ -267,6 +438,21 @@ export default function SettingsScreen() {
         await AsyncStorage.setItem('avoidCaffeineHours', avoidCaffeineHours.toString());
         await AsyncStorage.setItem('avoidLateEatingReminder', JSON.stringify(avoidLateEatingReminder));
         await AsyncStorage.setItem('avoidLateEatingHours', avoidLateEatingHours.toString());
+        await AsyncStorage.setItem('didWindDownRoutine', JSON.stringify(didWindDownRoutine));
+
+        // Log saved values for debugging
+        console.log('Saved settings:', {
+          bedtime: bedtime.toISOString(),
+          blueLightReminder,
+          blueLightMinutes,
+          roomTempReminder,
+          roomTempMinutes,
+          avoidCaffeineReminder,
+          avoidCaffeineHours,
+          avoidLateEatingReminder,
+          avoidLateEatingHours,
+          didWindDownRoutine,
+        });
       } catch (error) {
         console.error('Error saving settings:', error);
       }
@@ -282,17 +468,31 @@ export default function SettingsScreen() {
     avoidCaffeineHours,
     avoidLateEatingReminder,
     avoidLateEatingHours,
+    didWindDownRoutine,
   ]);
 
-  // Reschedule notifications when settings change
+  // Consolidated useEffect for rescheduling notifications with debounce
   useEffect(() => {
-    const rescheduleNotifications = async () => {
-      const hasPermission = await requestNotificationPermissions();
-      if (hasPermission) {
-        await scheduleBedtimeNotifications(bedtime);
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(async () => {
+      try {
+        const hasPermission = await requestNotificationPermissions();
+        if (hasPermission) {
+          await scheduleBedtimeNotifications(bedtime);
+        }
+      } catch (error) {
+        console.error('Error rescheduling notifications:', error);
+      }
+    }, 1000);
+
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
       }
     };
-    rescheduleNotifications();
   }, [
     bedtime,
     blueLightReminder,
@@ -305,18 +505,24 @@ export default function SettingsScreen() {
     avoidLateEatingHours,
   ]);
 
+  // UseEffect to check and fire notifications every minute
   useEffect(() => {
-    const subscription = Notifications.addNotificationReceivedListener(async () => {
-      const savedBedtime = await AsyncStorage.getItem('bedtime');
-      if (savedBedtime) {
-        const hasPermission = await requestNotificationPermissions();
-        if (hasPermission) {
-          await scheduleBedtimeNotifications(new Date(savedBedtime));
-        }
-      }
-    });
-    return () => subscription.remove();
-  }, []);
+    const interval = setInterval(() => {
+      checkAndFireNotifications();
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [
+    bedtime,
+    blueLightReminder,
+    blueLightMinutes,
+    roomTempReminder,
+    roomTempMinutes,
+    avoidCaffeineReminder,
+    avoidCaffeineHours,
+    avoidLateEatingReminder,
+    avoidLateEatingHours,
+  ]);
 
   const onChangeTime = async (event: any, selectedTime?: Date) => {
     if (Platform.OS === 'android') {
@@ -346,7 +552,7 @@ export default function SettingsScreen() {
 
   const formatDuration = (value: number, unit: 'hours' | 'minutes') => {
     if (unit === 'hours') {
-      return `${value} hr${value !== 1 ? 's' : ''}`;
+      return value === 0 ? '0 hrs (off)' : `${value} hr${value !== 1 ? 's' : ''}`;
     } else {
       return `${value} min${value !== 1 ? 's' : ''}`;
     }
@@ -357,7 +563,11 @@ export default function SettingsScreen() {
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
     >
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Settings</ThemedText>
+        <ThemedText type="title">Sleep Settings</ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="subtitle">Mandatory Sleep Habits</ThemedText>
       </ThemedView>
 
       {/* Bedtime Section */}
@@ -371,26 +581,17 @@ export default function SettingsScreen() {
         </TouchableOpacity>
       </ThemedView>
 
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="subtitle">More Sleep Habits & Reminders</ThemedText>
-      </ThemedView>
-
       {/* Avoid Blue Light Reminder Section */}
       <ThemedView style={styles.section}>
         <ThemedView style={styles.toggleContainer}>
           <View style={styles.labelContainer}>
             <ThemedText type="subtitle" style={styles.smallerText}>
-              Avoid Blue Light
+              Avoid Blue Light Reminder
             </ThemedText>
           </View>
           <Switch
             value={blueLightReminder}
-            onValueChange={(value) => {
-              setBlueLightReminder(value);
-              if (value) {
-                setBlueLightMinutes(60);
-              }
-            }}
+            onValueChange={(value) => setBlueLightReminder(value)}
           />
         </ThemedView>
         {blueLightReminder && (
@@ -408,17 +609,12 @@ export default function SettingsScreen() {
         <ThemedView style={styles.toggleContainer}>
           <View style={styles.labelContainer}>
             <ThemedText type="subtitle" style={styles.smallerText}>
-              Room Temperature
+              Room Temperature Reminder
             </ThemedText>
           </View>
           <Switch
             value={roomTempReminder}
-            onValueChange={(value) => {
-              setRoomTempReminder(value);
-              if (value) {
-                setRoomTempMinutes(15);
-              }
-            }}
+            onValueChange={(value) => setRoomTempReminder(value)}
           />
         </ThemedView>
         {roomTempReminder && (
@@ -431,6 +627,25 @@ export default function SettingsScreen() {
         )}
       </ThemedView>
 
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="subtitle">More Sleep Habits & Reminders</ThemedText>
+      </ThemedView>
+
+      {/* Did Wind-Down Routine Section */}
+      <ThemedView style={styles.section}>
+        <ThemedView style={styles.toggleContainer}>
+          <View style={styles.labelContainer}>
+            <ThemedText type="subtitle" style={styles.smallerText}>
+              Did Wind-Down Routine (e.g., yoga, meditation, etc.)
+            </ThemedText>
+          </View>
+          <Switch
+            value={didWindDownRoutine}
+            onValueChange={(value) => setDidWindDownRoutine(value)}
+          />
+        </ThemedView>
+      </ThemedView>
+
       {/* Avoid Caffeine, Nicotine, Alcohol Reminder Section */}
       <ThemedView style={styles.section}>
         <ThemedView style={styles.toggleContainer}>
@@ -441,12 +656,7 @@ export default function SettingsScreen() {
           </View>
           <Switch
             value={avoidCaffeineReminder}
-            onValueChange={(value) => {
-              setAvoidCaffeineReminder(value);
-              if (value) {
-                setAvoidCaffeineHours(6);
-              }
-            }}
+            onValueChange={(value) => setAvoidCaffeineReminder(value)}
           />
         </ThemedView>
         {avoidCaffeineReminder && (
@@ -469,12 +679,7 @@ export default function SettingsScreen() {
           </View>
           <Switch
             value={avoidLateEatingReminder}
-            onValueChange={(value) => {
-              setAvoidLateEatingReminder(value);
-              if (value) {
-                setAvoidLateEatingHours(3);
-              }
-            }}
+            onValueChange={(value) => setAvoidLateEatingReminder(value)}
           />
         </ThemedView>
         {avoidLateEatingReminder && (
@@ -622,7 +827,7 @@ export default function SettingsScreen() {
         </Modal>
       )}
 
-      {/* Avoid Caffeine Reminder Picker Modal (now hours only, 1 to 12) */}
+      {/* Avoid Caffeine Reminder Picker Modal (now hours, 0 to 12) */}
       {showAvoidCaffeinePicker && (
         <Modal
           transparent={true}
@@ -639,8 +844,12 @@ export default function SettingsScreen() {
                   selectedValue={avoidCaffeineHours}
                   onValueChange={(itemValue) => setAvoidCaffeineHours(itemValue)}
                 >
-                  {[...Array(12).keys()].map((hour) => (
-                    <Picker.Item key={hour + 1} label={`${hour + 1} hr${hour + 1 !== 1 ? 's' : ''}`} value={hour + 1} />
+                  {[...Array(13).keys()].map((hour) => (
+                    <Picker.Item
+                      key={hour}
+                      label={hour === 0 ? '0 hrs (off)' : `${hour} hr${hour !== 1 ? 's' : ''}`}
+                      value={hour}
+                    />
                   ))}
                 </Picker>
               </View>
@@ -655,7 +864,7 @@ export default function SettingsScreen() {
         </Modal>
       )}
 
-      {/* Avoid Late Night Eating Reminder Picker Modal (now hours only, 1 to 12) */}
+      {/* Avoid Late Night Eating Reminder Picker Modal (now hours, 0 to 12) */}
       {showAvoidLateEatingPicker && (
         <Modal
           transparent={true}
@@ -672,8 +881,12 @@ export default function SettingsScreen() {
                   selectedValue={avoidLateEatingHours}
                   onValueChange={(itemValue) => setAvoidLateEatingHours(itemValue)}
                 >
-                  {[...Array(12).keys()].map((hour) => (
-                    <Picker.Item key={hour + 1} label={`${hour + 1} hr${hour + 1 !== 1 ? 's' : ''}`} value={hour + 1} />
+                  {[...Array(13).keys()].map((hour) => (
+                    <Picker.Item
+                      key={hour}
+                      label={hour === 0 ? '0 hrs (off)' : `${hour} hr${hour !== 1 ? 's' : ''}`}
+                      value={hour}
+                    />
                   ))}
                 </Picker>
               </View>
