@@ -15,6 +15,9 @@ export default function HomeScreen() {
     goToBed: false,
     avoidBlueLight: false,
     roomTemp: false,
+    didWindDown: false,
+    avoidCaffeine: false,
+    avoidLateEating: false,
   });
 
   const [streak, setStreak] = useState<boolean[]>([false, false, false, false, false, false, false]);
@@ -22,6 +25,11 @@ export default function HomeScreen() {
   const [isDayCompleted, setIsDayCompleted] = useState(false);
   const [bedtime, setBedtime] = useState<Date | null>(null);
   const [blueLightMinutes, setBlueLightMinutes] = useState<number>(60);
+  const [didWindDownRoutine, setDidWindDownRoutine] = useState<boolean>(false);
+  const [avoidCaffeineReminder, setAvoidCaffeineReminder] = useState<boolean>(false);
+  const [avoidCaffeineHours, setAvoidCaffeineHours] = useState<number>(6);
+  const [avoidLateEatingReminder, setAvoidLateEatingReminder] = useState<boolean>(false);
+  const [avoidLateEatingHours, setAvoidLateEatingHours] = useState<number>(3);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempDate, setTempDate] = useState<Date>(new Date());
 
@@ -33,6 +41,11 @@ export default function HomeScreen() {
       const savedCompletionDate = await AsyncStorage.getItem('lastCompletionDate');
       const savedBedtime = await AsyncStorage.getItem('bedtime');
       const savedBlueLightMinutes = await AsyncStorage.getItem('blueLightMinutes');
+      const savedDidWindDownRoutine = await AsyncStorage.getItem('didWindDownRoutine');
+      const savedAvoidCaffeineReminder = await AsyncStorage.getItem('avoidCaffeineReminder');
+      const savedAvoidCaffeineHours = await AsyncStorage.getItem('avoidCaffeineHours');
+      const savedAvoidLateEatingReminder = await AsyncStorage.getItem('avoidLateEatingReminder');
+      const savedAvoidLateEatingHours = await AsyncStorage.getItem('avoidLateEatingHours');
 
       if (savedHabits) {
         setHabits(JSON.parse(savedHabits));
@@ -55,6 +68,21 @@ export default function HomeScreen() {
       if (savedBlueLightMinutes) {
         setBlueLightMinutes(parseInt(savedBlueLightMinutes));
       }
+      if (savedDidWindDownRoutine) {
+        setDidWindDownRoutine(JSON.parse(savedDidWindDownRoutine));
+      }
+      if (savedAvoidCaffeineReminder) {
+        setAvoidCaffeineReminder(JSON.parse(savedAvoidCaffeineReminder));
+      }
+      if (savedAvoidCaffeineHours) {
+        setAvoidCaffeineHours(parseInt(savedAvoidCaffeineHours));
+      }
+      if (savedAvoidLateEatingReminder) {
+        setAvoidLateEatingReminder(JSON.parse(savedAvoidLateEatingReminder));
+      }
+      if (savedAvoidLateEatingHours) {
+        setAvoidLateEatingHours(parseInt(savedAvoidLateEatingHours));
+      }
     } catch (error) {
       console.error('Error loading data:', error);
     }
@@ -65,18 +93,39 @@ export default function HomeScreen() {
     loadData();
   }, []);
 
-  // Reload bedtime when the screen comes into focus
+  // Reload settings when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       const loadSettings = async () => {
         try {
           const savedBedtime = await AsyncStorage.getItem('bedtime');
           const savedBlueLightMinutes = await AsyncStorage.getItem('blueLightMinutes');
+          const savedDidWindDownRoutine = await AsyncStorage.getItem('didWindDownRoutine');
+          const savedAvoidCaffeineReminder = await AsyncStorage.getItem('avoidCaffeineReminder');
+          const savedAvoidCaffeineHours = await AsyncStorage.getItem('avoidCaffeineHours');
+          const savedAvoidLateEatingReminder = await AsyncStorage.getItem('avoidLateEatingReminder');
+          const savedAvoidLateEatingHours = await AsyncStorage.getItem('avoidLateEatingHours');
+
           if (savedBedtime) {
             setBedtime(new Date(savedBedtime));
           }
           if (savedBlueLightMinutes) {
             setBlueLightMinutes(parseInt(savedBlueLightMinutes));
+          }
+          if (savedDidWindDownRoutine) {
+            setDidWindDownRoutine(JSON.parse(savedDidWindDownRoutine));
+          }
+          if (savedAvoidCaffeineReminder) {
+            setAvoidCaffeineReminder(JSON.parse(savedAvoidCaffeineReminder));
+          }
+          if (savedAvoidCaffeineHours) {
+            setAvoidCaffeineHours(parseInt(savedAvoidCaffeineHours));
+          }
+          if (savedAvoidLateEatingReminder) {
+            setAvoidLateEatingReminder(JSON.parse(savedAvoidLateEatingReminder));
+          }
+          if (savedAvoidLateEatingHours) {
+            setAvoidLateEatingHours(parseInt(savedAvoidLateEatingHours));
           }
         } catch (error) {
           console.error('Error loading settings on focus:', error);
@@ -118,12 +167,18 @@ export default function HomeScreen() {
         goToBed: false,
         avoidBlueLight: false,
         roomTemp: false,
+        didWindDown: false,
+        avoidCaffeine: false,
+        avoidLateEating: false,
       });
     } else {
       setHabits({
         goToBed: true,
         avoidBlueLight: true,
         roomTemp: true,
+        didWindDown: true,
+        avoidCaffeine: true,
+        avoidLateEating: true,
       });
     }
   };
@@ -137,8 +192,14 @@ export default function HomeScreen() {
   };
 
   const handleCompleteDay = () => {
-    const allHabitsCompleted = Object.values(habits).every((habit) => habit);
-    if (allHabitsCompleted) {
+    // Only the mandatory habits are required to complete the day
+    const mandatoryHabits = {
+      goToBed: habits.goToBed,
+      avoidBlueLight: habits.avoidBlueLight,
+      roomTemp: habits.roomTemp,
+    };
+    const allMandatoryHabitsCompleted = Object.values(mandatoryHabits).every((habit) => habit);
+    if (allMandatoryHabitsCompleted) {
       const today = new Date().getDay();
       const adjustedDay = today === 0 ? 6 : today - 1;
       setStreak((prev) => {
@@ -170,6 +231,9 @@ export default function HomeScreen() {
                 goToBed: false,
                 avoidBlueLight: false,
                 roomTemp: false,
+                didWindDown: false,
+                avoidCaffeine: false,
+                avoidLateEating: false,
               });
               setStreak([false, false, false, false, false, false, false]);
               setLastCompletionDate(null);
@@ -178,6 +242,9 @@ export default function HomeScreen() {
                 goToBed: false,
                 avoidBlueLight: false,
                 roomTemp: false,
+                didWindDown: false,
+                avoidCaffeine: false,
+                avoidLateEating: false,
               }));
               await AsyncStorage.setItem('streak', JSON.stringify([false, false, false, false, false, false, false]));
               await AsyncStorage.setItem('lastCompletionDate', '');
@@ -231,6 +298,14 @@ export default function HomeScreen() {
     return `${formattedHours}:${formattedMinutes} ${ampm}`;
   };
 
+  const formatDuration = (value: number, unit: 'hours' | 'minutes') => {
+    if (unit === 'hours') {
+      return value === 0 ? '0 hrs (off)' : `${value} hr${value !== 1 ? 's' : ''}`;
+    } else {
+      return `${value} min${value !== 1 ? 's' : ''}`;
+    }
+  };
+
   const daysOfWeek = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
   const isDevMode = __DEV__;
@@ -260,60 +335,128 @@ export default function HomeScreen() {
 
       <ThemedView style={styles.sectionContainer}>
         <ThemedText type="title">Tasks for Today</ThemedText>
-        <View style={styles.checklist}>
-          <TouchableOpacity
-            style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
-            onPress={() => toggleHabit('goToBed')}
-            disabled={isDayCompleted}
-          >
-            <View style={[styles.checkbox, habits.goToBed && styles.checkboxChecked]}>
-              {habits.goToBed && <View style={styles.checkboxFill} />}
-            </View>
-            <ThemedText style={isDayCompleted && styles.disabledText}>
-              Go to bed at {bedtime ? formatTime(bedtime) : '10:00 PM'}
-            </ThemedText>
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
-            onPress={() => toggleHabit('avoidBlueLight')}
-            disabled={isDayCompleted}
-          >
-            <View style={[styles.checkbox, habits.avoidBlueLight && styles.checkboxChecked]}>
-              {habits.avoidBlueLight && <View style={styles.checkboxFill} />}
-            </View>
-            <ThemedText style={isDayCompleted && styles.disabledText}>
-              Avoided bluelight (no phones, tablets, bright lights {blueLightMinutes} mins before bed)
-            </ThemedText>
-          </TouchableOpacity>
+        <ThemedView style={styles.subSectionContainer}>
+          <ThemedText type="subtitle">Mandatory Sleep Habits</ThemedText>
+          <View style={styles.checklist}>
+            <TouchableOpacity
+              style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+              onPress={() => toggleHabit('goToBed')}
+              disabled={isDayCompleted}
+            >
+              <View style={[styles.checkbox, habits.goToBed && styles.checkboxChecked]}>
+                {habits.goToBed && <View style={styles.checkboxFill} />}
+              </View>
+              <ThemedText style={isDayCompleted && styles.disabledText}>
+                Go to bed at {bedtime ? formatTime(bedtime) : '10:00 PM'}
+              </ThemedText>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
-            onPress={() => toggleHabit('roomTemp')}
-            disabled={isDayCompleted}
-          >
-            <View style={[styles.checkbox, habits.roomTemp && styles.checkboxChecked]}>
-              {habits.roomTemp && <View style={styles.checkboxFill} />}
+            <TouchableOpacity
+              style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+              onPress={() => toggleHabit('avoidBlueLight')}
+              disabled={isDayCompleted}
+            >
+              <View style={[styles.checkbox, habits.avoidBlueLight && styles.checkboxChecked]}>
+                {habits.avoidBlueLight && <View style={styles.checkboxFill} />}
+              </View>
+              <ThemedText style={isDayCompleted && styles.disabledText}>
+                Avoided bluelight (no phones, tablets, bright lights {formatDuration(blueLightMinutes, 'minutes')} before bed)
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+              onPress={() => toggleHabit('roomTemp')}
+              disabled={isDayCompleted}
+            >
+              <View style={[styles.checkbox, habits.roomTemp && styles.checkboxChecked]}>
+                {habits.roomTemp && <View style={styles.checkboxFill} />}
+              </View>
+              <ThemedText style={isDayCompleted && styles.disabledText}>
+                Set room temperature to 60-67°F / 15-19°C
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
+        </ThemedView>
+
+        {(didWindDownRoutine || (avoidCaffeineReminder && avoidCaffeineHours > 0) || (avoidLateEatingReminder && avoidLateEatingHours > 0)) && (
+          <ThemedView style={styles.subSectionContainer}>
+            <ThemedText type="subtitle">Bonus Sleep Habits</ThemedText>
+            <View style={styles.checklist}>
+              {didWindDownRoutine && (
+                <TouchableOpacity
+                  style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+                  onPress={() => toggleHabit('didWindDown')}
+                  disabled={isDayCompleted}
+                >
+                  <View style={[styles.checkbox, habits.didWindDown && styles.checkboxChecked]}>
+                    {habits.didWindDown && <View style={styles.checkboxFill} />}
+                  </View>
+                  <ThemedText style={isDayCompleted && styles.disabledText}>
+                    Did wind-down routine (e.g., yoga, reading, meditation)
+                  </ThemedText>
+                </TouchableOpacity>
+              )}
+
+              {avoidCaffeineReminder && avoidCaffeineHours > 0 && (
+                <TouchableOpacity
+                  style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+                  onPress={() => toggleHabit('avoidCaffeine')}
+                  disabled={isDayCompleted}
+                >
+                  <View style={[styles.checkbox, habits.avoidCaffeine && styles.checkboxChecked]}>
+                    {habits.avoidCaffeine && <View style={styles.checkboxFill} />}
+                  </View>
+                  <ThemedText style={isDayCompleted && styles.disabledText}>
+                    Avoided caffeine, nicotine, alcohol ({formatDuration(avoidCaffeineHours, 'hours')} before bed)
+                  </ThemedText>
+                </TouchableOpacity>
+              )}
+
+              {avoidLateEatingReminder && avoidLateEatingHours > 0 && (
+                <TouchableOpacity
+                  style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+                  onPress={() => toggleHabit('avoidLateEating')}
+                  disabled={isDayCompleted}
+                >
+                  <View style={[styles.checkbox, habits.avoidLateEating && styles.checkboxChecked]}>
+                    {habits.avoidLateEating && <View style={styles.checkboxFill} />}
+                  </View>
+                  <ThemedText style={isDayCompleted && styles.disabledText}>
+                    Avoided late night eating ({formatDuration(avoidLateEatingHours, 'hours')} before bed)
+                  </ThemedText>
+                </TouchableOpacity>
+              )}
             </View>
-            <ThemedText style={isDayCompleted && styles.disabledText}>
-              Set room temperature to 60-67°F / 15-19°C
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
+          </ThemedView>
+        )}
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[
               styles.completeButton,
-              (isDayCompleted || !Object.values(habits).every((habit) => habit)) && styles.completeButtonDisabled,
+              (isDayCompleted || !Object.values({
+                goToBed: habits.goToBed,
+                avoidBlueLight: habits.avoidBlueLight,
+                roomTemp: habits.roomTemp,
+              }).every((habit) => habit)) && styles.completeButtonDisabled,
             ]}
             onPress={handleCompleteDay}
-            disabled={isDayCompleted || !Object.values(habits).every((habit) => habit)}
+            disabled={isDayCompleted || !Object.values({
+              goToBed: habits.goToBed,
+              avoidBlueLight: habits.avoidBlueLight,
+              roomTemp: habits.roomTemp,
+            }).every((habit) => habit)}
           >
             <ThemedText
               style={[
                 styles.completeButtonText,
-                (isDayCompleted || !Object.values(habits).every((habit) => habit)) && styles.completeButtonTextDisabled,
+                (isDayCompleted || !Object.values({
+                  goToBed: habits.goToBed,
+                  avoidBlueLight: habits.avoidBlueLight,
+                  roomTemp: habits.roomTemp,
+                }).every((habit) => habit)) && styles.completeButtonTextDisabled,
               ]}
             >
               Complete Day
@@ -401,6 +544,10 @@ const styles = StyleSheet.create({
   sectionContainer: {
     gap: 8,
     marginBottom: 16,
+  },
+  subSectionContainer: {
+    marginTop: 16,
+    gap: 8,
   },
   streakContainer: {
     flexDirection: 'row',
@@ -518,7 +665,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cancelButton: {
-    padding: 15, // Kept at 25 as required for Cancel text visibility
+    padding: 15,
     borderRadius: 8,
     backgroundColor: '#FF4D4D',
     alignItems: 'center',
@@ -529,7 +676,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   doneButton: {
-    padding: 15, // Kept at 25 to match Cancel button
+    padding: 15,
     borderRadius: 8,
     backgroundColor: '#0A7EA4',
     alignItems: 'center',
