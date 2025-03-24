@@ -34,309 +34,10 @@ export default function SettingsScreen() {
   // State for Avoid Late Night Eating Reminder (now hours, 0 to 12)
   const [avoidLateEatingReminder, setAvoidLateEatingReminder] = useState(false);
   const [avoidLateEatingHours, setAvoidLateEatingHours] = useState(3);
-  const [showAvoidLateEatingPicker, setShowAvoidLateEatingPicker] = useState(false)
+  const [showAvoidLateEatingPicker, setShowAvoidLateEatingPicker] = useState(false);
 
   // State for Did Wind-Down Routine (boolean toggle)
   const [didWindDownRoutine, setDidWindDownRoutine] = useState(false);
-
-  // Debounce ref for scheduling
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
-  });
-
-  // Function to request notification permissions
-  const requestNotificationPermissions = async () => {
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('bedtime-reminders', {
-        name: 'Bedtime Reminders',
-        importance: Notifications.AndroidImportance.HIGH,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
-
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== 'granted') {
-      setShowPermissionPrompt(true);
-      return false;
-    }
-    setShowPermissionPrompt(false);
-    return true;
-  };
-
-  // Function to schedule all notifications
-  const scheduleBedtimeNotifications = async (bedtime: Date) => {
-    await Notifications.cancelAllScheduledNotificationsAsync();
-
-    const now = new Date();
-    const scheduleForTomorrow = (time: Date) => {
-      const nowTime = now.getTime();
-      const targetTime = new Date(now);
-      targetTime.setHours(time.getHours(), time.getMinutes(), time.getSeconds(), 0);
-      const timeDifference = nowTime - targetTime.getTime();
-      return timeDifference > 60000; // 60 seconds
-    };
-
-    // Wind Down Notification (1 hour before bedtime)
-    const windDownTime = new Date(bedtime);
-    windDownTime.setHours(bedtime.getHours() - 1);
-    windDownTime.setMinutes(bedtime.getMinutes());
-    windDownTime.setSeconds(0);
-
-    const windDownTrigger = new Date(now);
-    windDownTrigger.setHours(windDownTime.getHours());
-    windDownTrigger.setMinutes(windDownTime.getMinutes());
-    windDownTrigger.setSeconds(0);
-    if (scheduleForTomorrow(windDownTime)) {
-      windDownTrigger.setDate(windDownTrigger.getDate() + 1);
-    }
-
-    console.log('Wind Down Notification scheduled for:', windDownTrigger.toLocaleString());
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Time to Wind Down',
-        body: 'Start winding down and avoid blue light to prepare for bed.',
-      },
-      trigger: {
-        date: windDownTrigger,
-      },
-    });
-
-    // Avoid Blue Light Reminder
-    if (blueLightReminder) {
-      const blueLightTime = new Date(bedtime);
-      blueLightTime.setMinutes(bedtime.getMinutes() - blueLightMinutes);
-      blueLightTime.setSeconds(0);
-
-      const blueLightTrigger = new Date(now);
-      blueLightTrigger.setHours(blueLightTime.getHours());
-      blueLightTrigger.setMinutes(blueLightTime.getMinutes());
-      blueLightTrigger.setSeconds(0);
-      if (scheduleForTomorrow(blueLightTime)) {
-        blueLightTrigger.setDate(blueLightTrigger.getDate() + 1);
-      }
-
-      console.log('Avoid Blue Light Notification scheduled for:', blueLightTrigger.toLocaleString());
-
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Avoid Blue Light',
-          body: 'Stop using screens to reduce blue light exposure before bed.',
-        },
-        trigger: {
-          date: blueLightTrigger,
-        },
-      });
-    }
-
-    // Room Temperature Reminder
-    if (roomTempReminder) {
-      const tempTime = new Date(bedtime);
-      tempTime.setMinutes(bedtime.getMinutes() - roomTempMinutes);
-      tempTime.setSeconds(0);
-
-      const tempTrigger = new Date(now);
-      tempTrigger.setHours(tempTime.getHours());
-      tempTrigger.setMinutes(tempTime.getMinutes());
-      tempTrigger.setSeconds(0);
-      if (scheduleForTomorrow(tempTime)) {
-        tempTrigger.setDate(tempTrigger.getDate() + 1);
-      }
-
-      console.log('Room Temperature Notification scheduled for:', tempTrigger.toLocaleString());
-
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Prepare Your Room',
-          body: 'Set your room temperature to 60-67°F / 15-19°C for optimal sleep.',
-        },
-        trigger: {
-          date: tempTrigger,
-        },
-      });
-    }
-
-    // Avoid Caffeine, Nicotine, Alcohol Reminder
-    if (avoidCaffeineReminder && avoidCaffeineHours > 0) {
-      const avoidCaffeineTime = new Date(bedtime);
-      avoidCaffeineTime.setHours(bedtime.getHours() - avoidCaffeineHours);
-      avoidCaffeineTime.setSeconds(0);
-
-      const avoidCaffeineTrigger = new Date(now);
-      avoidCaffeineTrigger.setHours(avoidCaffeineTime.getHours());
-      avoidCaffeineTrigger.setMinutes(avoidCaffeineTime.getMinutes());
-      avoidCaffeineTrigger.setSeconds(0);
-      if (scheduleForTomorrow(avoidCaffeineTime)) {
-        avoidCaffeineTrigger.setDate(avoidCaffeineTrigger.getDate() + 1);
-      }
-
-      console.log('Avoid Caffeine Notification scheduled for:', avoidCaffeineTrigger.toLocaleString());
-
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Avoid Caffeine, Nicotine, Alcohol',
-          body: 'Avoid consuming caffeine, nicotine, or alcohol to improve sleep quality.',
-        },
-        trigger: {
-          date: avoidCaffeineTrigger,
-        },
-      });
-    }
-
-    // Avoid Late Night Eating Reminder
-    if (avoidLateEatingReminder && avoidLateEatingHours > 0) {
-      const avoidLateEatingTime = new Date(bedtime);
-      avoidLateEatingTime.setHours(bedtime.getHours() - avoidLateEatingHours);
-      avoidLateEatingTime.setSeconds(0);
-
-      const avoidLateEatingTrigger = new Date(now);
-      avoidLateEatingTrigger.setHours(avoidLateEatingTime.getHours());
-      avoidLateEatingTrigger.setMinutes(avoidLateEatingTime.getMinutes());
-      avoidLateEatingTrigger.setSeconds(0);
-      if (scheduleForTomorrow(avoidLateEatingTime)) {
-        avoidLateEatingTrigger.setDate(avoidLateEatingTrigger.getDate() + 1);
-      }
-
-      console.log('Avoid Late Night Eating Notification scheduled for:', avoidLateEatingTrigger.toLocaleString());
-
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Avoid Late Night Eating',
-          body: 'Stop eating to allow your body to prepare for sleep.',
-        },
-        trigger: {
-          date: avoidLateEatingTrigger,
-        },
-      });
-    }
-  };
-
-  // Function to check and fire notifications immediately if the time matches
-  const checkAndFireNotifications = () => {
-    const now = new Date();
-    const nowTime = now.getTime();
-
-    // Wind Down Notification (1 hour before bedtime)
-    const windDownTime = new Date(bedtime);
-    windDownTime.setHours(bedtime.getHours() - 1);
-    windDownTime.setMinutes(bedtime.getMinutes());
-    windDownTime.setSeconds(0);
-
-    const windDownTrigger = new Date(now);
-    windDownTrigger.setHours(windDownTime.getHours());
-    windDownTrigger.setMinutes(windDownTime.getMinutes());
-    windDownTrigger.setSeconds(0);
-    const windDownTimeMs = windDownTrigger.getTime();
-    if (nowTime >= windDownTimeMs && nowTime - windDownTimeMs <= 60000) {
-      console.log('Firing Wind Down Notification immediately');
-      Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Time to Wind Down',
-          body: 'Start winding down and avoid blue light to prepare for bed.',
-        },
-        trigger: null,
-      });
-    }
-
-    // Avoid Blue Light Reminder
-    if (blueLightReminder) {
-      const blueLightTime = new Date(bedtime);
-      blueLightTime.setMinutes(bedtime.getMinutes() - blueLightMinutes);
-      blueLightTime.setSeconds(0);
-
-      const blueLightTrigger = new Date(now);
-      blueLightTrigger.setHours(blueLightTime.getHours());
-      blueLightTrigger.setMinutes(blueLightTime.getMinutes());
-      blueLightTrigger.setSeconds(0);
-      const blueLightTimeMs = blueLightTrigger.getTime();
-      if (nowTime >= blueLightTimeMs && nowTime - blueLightTimeMs <= 60000) {
-        console.log('Firing Avoid Blue Light Notification immediately');
-        Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'Avoid Blue Light',
-            body: 'Stop using screens to reduce blue light exposure before bed.',
-          },
-          trigger: null,
-        });
-      }
-    }
-
-    // Room Temperature Reminder
-    if (roomTempReminder) {
-      const tempTime = new Date(bedtime);
-      tempTime.setMinutes(bedtime.getMinutes() - roomTempMinutes);
-      tempTime.setSeconds(0);
-
-      const tempTrigger = new Date(now);
-      tempTrigger.setHours(tempTime.getHours());
-      tempTrigger.setMinutes(tempTime.getMinutes());
-      tempTrigger.setSeconds(0);
-      const tempTimeMs = tempTrigger.getTime();
-      if (nowTime >= tempTimeMs && nowTime - tempTimeMs <= 60000) {
-        console.log('Firing Room Temperature Notification immediately');
-        Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'Prepare Your Room',
-            body: 'Set your room temperature to 60-67°F / 15-19°C for optimal sleep.',
-          },
-          trigger: null,
-        });
-      }
-    }
-
-    // Avoid Caffeine, Nicotine, Alcohol Reminder
-    if (avoidCaffeineReminder && avoidCaffeineHours > 0) {
-      const avoidCaffeineTime = new Date(bedtime);
-      avoidCaffeineTime.setHours(bedtime.getHours() - avoidCaffeineHours);
-      avoidCaffeineTime.setSeconds(0);
-
-      const avoidCaffeineTrigger = new Date(now);
-      avoidCaffeineTrigger.setHours(avoidCaffeineTime.getHours());
-      avoidCaffeineTrigger.setMinutes(avoidCaffeineTime.getMinutes());
-      avoidCaffeineTrigger.setSeconds(0);
-      const avoidCaffeineTimeMs = avoidCaffeineTrigger.getTime();
-      if (nowTime >= avoidCaffeineTimeMs && nowTime - avoidCaffeineTimeMs <= 60000) {
-        console.log('Firing Avoid Caffeine Notification immediately');
-        Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'Avoid Caffeine, Nicotine, Alcohol',
-            body: 'Avoid consuming caffeine, nicotine, or alcohol to improve sleep quality.',
-          },
-          trigger: null,
-        });
-      }
-    }
-
-    // Avoid Late Night Eating Reminder
-    if (avoidLateEatingReminder && avoidLateEatingHours > 0) {
-      const avoidLateEatingTime = new Date(bedtime);
-      avoidLateEatingTime.setHours(bedtime.getHours() - avoidLateEatingHours);
-      avoidLateEatingTime.setSeconds(0);
-
-      const avoidLateEatingTrigger = new Date(now);
-      avoidLateEatingTrigger.setHours(avoidLateEatingTime.getHours());
-      avoidLateEatingTrigger.setMinutes(avoidLateEatingTime.getMinutes());
-      avoidLateEatingTrigger.setSeconds(0);
-      const avoidLateEatingTimeMs = avoidLateEatingTrigger.getTime();
-      if (nowTime >= avoidLateEatingTimeMs && nowTime - avoidLateEatingTimeMs <= 60000) {
-        console.log('Firing Avoid Late Night Eating Notification immediately');
-        Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'Avoid Late Night Eating',
-            body: 'Stop eating to allow your body to prepare for sleep.',
-          },
-          trigger: null,
-        });
-      }
-    }
-  };
 
   // Load saved settings from AsyncStorage
   useEffect(() => {
@@ -471,6 +172,129 @@ export default function SettingsScreen() {
     didWindDownRoutine,
   ]);
 
+  // Debounce ref for scheduling
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Function to schedule all notifications
+  const scheduleBedtimeNotifications = async (bedtime: Date) => {
+    await Notifications.cancelAllScheduledNotificationsAsync();
+
+    const now = new Date();
+    console.log('Current time:', now.toLocaleString());
+
+    // Helper function to calculate seconds until the trigger time
+    const calculateSecondsUntil = (targetTime: Date): number => {
+      const now = new Date();
+      let seconds = (targetTime.getTime() - now.getTime()) / 1000;
+      if (seconds <= 60) { // If within 60 seconds or in the past, schedule for tomorrow
+        targetTime.setDate(targetTime.getDate() + 1);
+        seconds = (targetTime.getTime() - now.getTime()) / 1000;
+      }
+      return Math.max(60, Math.round(seconds)); // Ensure at least 60 seconds in the future
+    };
+
+    // Wind Down Notification (1 hour before bedtime)
+    const windDownTime = new Date(bedtime);
+    windDownTime.setHours(bedtime.getHours() - 1);
+    windDownTime.setMinutes(bedtime.getMinutes());
+    windDownTime.setSeconds(0);
+
+    const windDownSeconds = calculateSecondsUntil(windDownTime);
+    console.log('Wind Down Notification scheduled in', windDownSeconds, 'seconds (at', windDownTime.toLocaleString(), ')');
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Time to Wind Down',
+        body: 'Start winding down and avoid blue light to prepare for bed.',
+      },
+      trigger: {
+        seconds: windDownSeconds,
+      },
+    });
+
+    // Avoid Blue Light Reminder
+    if (blueLightReminder) {
+      const blueLightTime = new Date(bedtime);
+      blueLightTime.setMinutes(bedtime.getMinutes() - blueLightMinutes);
+      blueLightTime.setSeconds(0);
+
+      const blueLightSeconds = calculateSecondsUntil(blueLightTime);
+      console.log('Avoid Blue Light Notification scheduled in', blueLightSeconds, 'seconds (at', blueLightTime.toLocaleString(), ')');
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Avoid Blue Light',
+          body: 'Stop using screens to reduce blue light exposure before bed.',
+        },
+        trigger: {
+          seconds: blueLightSeconds,
+        },
+      });
+    }
+
+    // Room Temperature Reminder
+    if (roomTempReminder) {
+      const tempTime = new Date(bedtime);
+      tempTime.setMinutes(bedtime.getMinutes() - roomTempMinutes);
+      tempTime.setSeconds(0);
+
+      const tempSeconds = calculateSecondsUntil(tempTime);
+      console.log('Room Temperature Notification scheduled in', tempSeconds, 'seconds (at', tempTime.toLocaleString(), ')');
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Prepare Your Room',
+          body: 'Set your room temperature to 60-67°F / 15-19°C for optimal sleep.',
+        },
+        trigger: {
+          seconds: tempSeconds,
+        },
+      });
+    }
+
+    // Avoid Caffeine, Nicotine, Alcohol Reminder
+    if (avoidCaffeineReminder && avoidCaffeineHours > 0) {
+      const avoidCaffeineTime = new Date(bedtime);
+      avoidCaffeineTime.setHours(bedtime.getHours() - avoidCaffeineHours);
+      avoidCaffeineTime.setMinutes(bedtime.getMinutes());
+      avoidCaffeineTime.setSeconds(0);
+
+      const avoidCaffeineSeconds = calculateSecondsUntil(avoidCaffeineTime);
+      console.log('Avoid Caffeine Notification scheduled in', avoidCaffeineSeconds, 'seconds (at', avoidCaffeineTime.toLocaleString(), ')');
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Avoid Caffeine, Nicotine, Alcohol',
+          body: 'Avoid consuming caffeine, nicotine, or alcohol to improve sleep quality.',
+        },
+        trigger: {
+          seconds: avoidCaffeineSeconds,
+        },
+      });
+    }
+
+    // Avoid Late Night Eating Reminder
+    if (avoidLateEatingReminder && avoidLateEatingHours > 0) {
+      const avoidLateEatingTime = new Date(bedtime);
+      avoidLateEatingTime.setHours(bedtime.getHours() - avoidLateEatingHours);
+      avoidLateEatingTime.setMinutes(bedtime.getMinutes());
+      avoidLateEatingTime.setSeconds(0);
+
+      const avoidLateEatingSeconds = calculateSecondsUntil(avoidLateEatingTime);
+      console.log('Avoid Late Night Eating Notification scheduled in', avoidLateEatingSeconds, 'seconds (at', avoidLateEatingTime.toLocaleString(), ')');
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Avoid Late Night Eating',
+          body: 'Stop eating to allow your body to prepare for sleep.',
+        },
+        trigger: {
+          seconds: avoidLateEatingSeconds,
+        },
+      });
+    }
+  };
+
   // Consolidated useEffect for rescheduling notifications with debounce
   useEffect(() => {
     if (debounceTimeout.current) {
@@ -505,26 +329,35 @@ export default function SettingsScreen() {
     avoidLateEatingHours,
   ]);
 
-  // UseEffect to check and fire notifications every minute
-  useEffect(() => {
-    const interval = setInterval(() => {
-      checkAndFireNotifications();
-    }, 30000); // Check every 30 seconds
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
 
-    return () => clearInterval(interval);
-  }, [
-    bedtime,
-    blueLightReminder,
-    blueLightMinutes,
-    roomTempReminder,
-    roomTempMinutes,
-    avoidCaffeineReminder,
-    avoidCaffeineHours,
-    avoidLateEatingReminder,
-    avoidLateEatingHours,
-  ]);
+  // Function to request notification permissions
+  const requestNotificationPermissions = async () => {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('bedtime-reminders', {
+        name: 'Bedtime Reminders',
+        importance: Notifications.AndroidImportance.HIGH,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
 
-  const onChangeTime = async (event: any, selectedTime?: Date) => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') {
+      setShowPermissionPrompt(true);
+      return false;
+    }
+    setShowPermissionPrompt(false);
+    return true;
+  };
+
+  const onChangeTime = (event: any, selectedTime?: Date) => {
     if (Platform.OS === 'android') {
       setShowTimePicker(false);
     }
@@ -533,11 +366,6 @@ export default function SettingsScreen() {
       const newBedtime = new Date(today);
       newBedtime.setHours(selectedTime.getHours(), selectedTime.getMinutes(), 0, 0);
       setBedtime(newBedtime);
-
-      const hasPermission = await requestNotificationPermissions();
-      if (hasPermission) {
-        await scheduleBedtimeNotifications(newBedtime);
-      }
     }
   };
 

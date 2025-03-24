@@ -28,6 +28,14 @@
         "EXPO_PUBLIC_SUPERWALL_API_KEY_IOS": "your_ios_api_key",
         "EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID": "your_android_key_here"
       }
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "environment": "development"
     }
   },
   "submit": {
