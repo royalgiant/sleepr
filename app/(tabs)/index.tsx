@@ -20,7 +20,15 @@ export default function HomeScreen() {
     avoidLateEating: false,
   });
 
-  const [streak, setStreak] = useState<boolean[]>([false, false, false, false, false, false, false]);
+  const [streak, setStreak] = useState<{ completedHabits: number }[]>([
+    { completedHabits: 0 },
+    { completedHabits: 0 },
+    { completedHabits: 0 },
+    { completedHabits: 0 },
+    { completedHabits: 0 },
+    { completedHabits: 0 },
+    { completedHabits: 0 },
+  ]);
   const [lastCompletionDate, setLastCompletionDate] = useState<string | null>(null);
   const [isDayCompleted, setIsDayCompleted] = useState(false);
   const [bedtime, setBedtime] = useState<Date | null>(null);
@@ -33,7 +41,10 @@ export default function HomeScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempDate, setTempDate] = useState<Date>(new Date());
 
-  // Function to load data from AsyncStorage
+  const calculateCompletedHabits = () => {
+    return Object.values(habits).filter((habit) => habit).length;
+  };
+
   const loadData = async () => {
     try {
       const savedHabits = await AsyncStorage.getItem('habits');
@@ -60,9 +71,8 @@ export default function HomeScreen() {
       if (savedBedtime) {
         setBedtime(new Date(savedBedtime));
       } else {
-        // Default bedtime if none is set
         const defaultBedtime = new Date();
-        defaultBedtime.setHours(22, 0, 0, 0); // Default to 10:00 PM
+        defaultBedtime.setHours(22, 0, 0, 0);
         setBedtime(defaultBedtime);
       }
       if (savedBlueLightMinutes) {
@@ -88,12 +98,10 @@ export default function HomeScreen() {
     }
   };
 
-  // Load data when the component mounts
   useEffect(() => {
     loadData();
   }, []);
 
-  // Reload settings when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       const loadSettings = async () => {
@@ -192,7 +200,6 @@ export default function HomeScreen() {
   };
 
   const handleCompleteDay = () => {
-    // Only the mandatory habits are required to complete the day
     const mandatoryHabits = {
       goToBed: habits.goToBed,
       avoidBlueLight: habits.avoidBlueLight,
@@ -202,9 +209,10 @@ export default function HomeScreen() {
     if (allMandatoryHabitsCompleted) {
       const today = new Date().getDay();
       const adjustedDay = today === 0 ? 6 : today - 1;
+      const completedHabitsCount = calculateCompletedHabits();
       setStreak((prev) => {
         const newStreak = [...prev];
-        newStreak[adjustedDay] = true;
+        newStreak[adjustedDay] = { completedHabits: completedHabitsCount };
         return newStreak;
       });
       const todayDateString = getLocalDateString(new Date());
@@ -235,7 +243,15 @@ export default function HomeScreen() {
                 avoidCaffeine: false,
                 avoidLateEating: false,
               });
-              setStreak([false, false, false, false, false, false, false]);
+              setStreak([
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+              ]);
               setLastCompletionDate(null);
               setIsDayCompleted(false);
               await AsyncStorage.setItem('habits', JSON.stringify({
@@ -246,7 +262,15 @@ export default function HomeScreen() {
                 avoidCaffeine: false,
                 avoidLateEating: false,
               }));
-              await AsyncStorage.setItem('streak', JSON.stringify([false, false, false, false, false, false, false]));
+              await AsyncStorage.setItem('streak', JSON.stringify([
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+                { completedHabits: 0 },
+              ]));
               await AsyncStorage.setItem('lastCompletionDate', '');
             } catch (error) {
               console.error('Error resetting streak:', error);
@@ -272,13 +296,13 @@ export default function HomeScreen() {
     setLastCompletionDate(dateString);
     checkIfDayCompleted(dateString);
 
-    // Update the streak to show the owl for the selected date
     const selectedDate = new Date(tempDate);
     const dayOfWeek = selectedDate.getDay();
-    const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Map Sunday (0) to index 6, Monday (1) to index 0, etc.
+    const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const completedHabitsCount = calculateCompletedHabits();
     setStreak((prev) => {
       const newStreak = [...prev];
-      newStreak[adjustedDay] = true; // Set the corresponding day to true to show the owl
+      newStreak[adjustedDay] = { completedHabits: completedHabitsCount };
       return newStreak;
     });
 
@@ -310,6 +334,17 @@ export default function HomeScreen() {
 
   const isDevMode = __DEV__;
 
+  const getOwlIcon = (completedHabits: number) => {
+    if (completedHabits >= 6) {
+      return require('@/assets/images/owl-icon-gold.png');
+    } else if (completedHabits >= 4 && completedHabits < 6) {
+      return require('@/assets/images/owl-icon-silver.png');
+    } else if (completedHabits == 3) {
+      return require('@/assets/images/owl-icon.png');
+    }
+    return null;
+  };
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -320,9 +355,9 @@ export default function HomeScreen() {
           {daysOfWeek.map((day, index) => (
             <View key={index} style={styles.streakDay}>
               <ThemedText style={styles.dayText}>{day}</ThemedText>
-              {streak[index] ? (
+              {streak[index].completedHabits > 0 ? (
                 <Image
-                  source={require('@/assets/images/owl-icon.png')}
+                  source={getOwlIcon(streak[index].completedHabits)}
                   style={styles.owlIcon}
                 />
               ) : (
@@ -347,7 +382,7 @@ export default function HomeScreen() {
               <View style={[styles.checkbox, habits.goToBed && styles.checkboxChecked]}>
                 {habits.goToBed && <View style={styles.checkboxFill} />}
               </View>
-              <ThemedText style={isDayCompleted && styles.disabledText}>
+              <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
                 Go to bed at {bedtime ? formatTime(bedtime) : '10:00 PM'}
               </ThemedText>
             </TouchableOpacity>
@@ -360,8 +395,8 @@ export default function HomeScreen() {
               <View style={[styles.checkbox, habits.avoidBlueLight && styles.checkboxChecked]}>
                 {habits.avoidBlueLight && <View style={styles.checkboxFill} />}
               </View>
-              <ThemedText style={isDayCompleted && styles.disabledText}>
-                Avoided bluelight (no phones, tablets, bright lights {formatDuration(blueLightMinutes, 'minutes')} before bed)
+              <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
+                Avoided bluelight (no phones, tablets, etc, {formatDuration(blueLightMinutes, 'mins')} before bed)
               </ThemedText>
             </TouchableOpacity>
 
@@ -373,8 +408,8 @@ export default function HomeScreen() {
               <View style={[styles.checkbox, habits.roomTemp && styles.checkboxChecked]}>
                 {habits.roomTemp && <View style={styles.checkboxFill} />}
               </View>
-              <ThemedText style={isDayCompleted && styles.disabledText}>
-                Set room temperature to 60-67°F / 15-19°C
+              <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
+                Set room temperature to 60-67°F(15-19°C)
               </ThemedText>
             </TouchableOpacity>
           </View>
@@ -393,7 +428,7 @@ export default function HomeScreen() {
                   <View style={[styles.checkbox, habits.didWindDown && styles.checkboxChecked]}>
                     {habits.didWindDown && <View style={styles.checkboxFill} />}
                   </View>
-                  <ThemedText style={isDayCompleted && styles.disabledText}>
+                  <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
                     Did wind-down routine (e.g., yoga, reading, meditation)
                   </ThemedText>
                 </TouchableOpacity>
@@ -408,7 +443,7 @@ export default function HomeScreen() {
                   <View style={[styles.checkbox, habits.avoidCaffeine && styles.checkboxChecked]}>
                     {habits.avoidCaffeine && <View style={styles.checkboxFill} />}
                   </View>
-                  <ThemedText style={isDayCompleted && styles.disabledText}>
+                  <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
                     Avoided caffeine, nicotine, alcohol ({formatDuration(avoidCaffeineHours, 'hours')} before bed)
                   </ThemedText>
                 </TouchableOpacity>
@@ -423,7 +458,7 @@ export default function HomeScreen() {
                   <View style={[styles.checkbox, habits.avoidLateEating && styles.checkboxChecked]}>
                     {habits.avoidLateEating && <View style={styles.checkboxFill} />}
                   </View>
-                  <ThemedText style={isDayCompleted && styles.disabledText}>
+                  <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
                     Avoided late night eating ({formatDuration(avoidLateEatingHours, 'hours')} before bed)
                   </ThemedText>
                 </TouchableOpacity>
@@ -575,11 +610,13 @@ const styles = StyleSheet.create({
   checklist: {
     marginTop: 8,
     gap: 12,
+    paddingHorizontal: 16,
   },
   checklistItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flexWrap: 'wrap',
   },
   disabledChecklistItem: {
     opacity: 0.5,
@@ -602,12 +639,17 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: '#0A7EA4',
   },
+  habitText: {
+    flex: 1,
+    flexShrink: 1,
+  },
   disabledText: {
     color: '#666',
   },
   buttonContainer: {
     marginTop: 16,
     gap: 12,
+    paddingHorizontal: 16,
   },
   completeButton: {
     padding: 16,
