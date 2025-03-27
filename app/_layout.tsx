@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 import 'react-native-reanimated';
+import * as RNIap from 'react-native-iap';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { superwallService } from '@/services/superwall';
@@ -14,6 +15,18 @@ import { OnboardingProvider } from '@/contexts/OnboardingContext';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+const initIAP = async () => {
+  console.log('Starting initIAP...');
+  try {
+    await RNIap.initConnection();
+    console.log('IAP connection initialized');
+    const products = await RNIap.getProducts({ skus: ['ANNUAL', 'MONTHLY'] });
+    console.log('Fetched products:', products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+  }
+};
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -24,6 +37,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (Platform.OS !== 'web') {
       superwallService.initialize();
+      initIAP();
     }
   }, []);
 

@@ -75,7 +75,7 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
-         identifier = "../../expappboilerplate.storekit">
+         identifier = "../../expoappboilerplate.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
