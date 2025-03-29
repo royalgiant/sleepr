@@ -22,7 +22,7 @@ export default function WelcomeScreen() {
         <View style={styles.content}>
           <View style={styles.main}>
             <Image 
-              source={require('../../assets/images/AppIcons/Assets.xcassets/AppIcon.appiconset/100.png')}
+              source={require('../../assets/images/AppIcons/ios.xcassets/1024.png')}
             />
             <ThemedText type="title" style={styles.title}>
               Sleepr
