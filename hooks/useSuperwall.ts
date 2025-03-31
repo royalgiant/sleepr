@@ -32,6 +32,7 @@ export function useSuperwall() {
     if (isLoading || Platform.OS === 'web') return;
     
     try {
+      console.log("Presenting paywall")
       await superwallService.presentPaywall(triggerId);
       // Refresh subscription status after paywall interaction
       await checkSubscription();
