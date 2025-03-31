@@ -1,4 +1,4 @@
-import { StyleSheet, View, Image, Alert, Platform, Modal, Text } from 'react-native';
+import { StyleSheet, View, Image, Alert, Platform, Modal, Text, ScrollView, SafeAreaView } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect, useCallback } from 'react';
@@ -6,7 +6,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors } from '@/constants/Colors';
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
@@ -346,239 +345,248 @@ export default function HomeScreen() {
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-    >
-      <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="title">Sleep Streak</ThemedText>
-        <View style={styles.streakContainer}>
-          {daysOfWeek.map((day, index) => (
-            <View key={index} style={styles.streakDay}>
-              <ThemedText style={styles.dayText}>{day}</ThemedText>
-              {streak[index].completedHabits > 0 ? (
-                <Image
-                  source={getOwlIcon(streak[index].completedHabits)}
-                  style={styles.owlIcon}
-                />
-              ) : (
-                <View style={styles.emptyCircle} />
-              )}
-            </View>
-          ))}
-        </View>
-      </ThemedView>
-
-      <ThemedView style={styles.sectionContainer}>
-        <ThemedText type="title">Tasks for Today</ThemedText>
-
-        <ThemedView style={styles.subSectionContainer}>
-          <ThemedText type="subtitle">Mandatory Sleep Habits</ThemedText>
-          <View style={styles.checklist}>
-            <TouchableOpacity
-              style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
-              onPress={() => toggleHabit('goToBed')}
-              disabled={isDayCompleted}
-            >
-              <View style={[styles.checkbox, habits.goToBed && styles.checkboxChecked]}>
-                {habits.goToBed && <View style={styles.checkboxFill} />}
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <ThemedView style={styles.sectionContainer}>
+          <ThemedText type="title">Sleep Streak</ThemedText>
+          <View style={styles.streakContainer}>
+            {daysOfWeek.map((day, index) => (
+              <View key={index} style={styles.streakDay}>
+                <ThemedText style={styles.dayText}>{day}</ThemedText>
+                {streak[index].completedHabits > 0 ? (
+                  <Image
+                    source={getOwlIcon(streak[index].completedHabits)}
+                    style={styles.owlIcon}
+                  />
+                ) : (
+                  <View style={styles.emptyCircle} />
+                )}
               </View>
-              <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
-                Go to bed at {bedtime ? formatTime(bedtime) : '10:00 PM'}
-              </ThemedText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
-              onPress={() => toggleHabit('avoidBlueLight')}
-              disabled={isDayCompleted}
-            >
-              <View style={[styles.checkbox, habits.avoidBlueLight && styles.checkboxChecked]}>
-                {habits.avoidBlueLight && <View style={styles.checkboxFill} />}
-              </View>
-              <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
-                Avoided bluelight (no phones, tablets, etc, {formatDuration(blueLightMinutes, 'mins')} before bed)
-              </ThemedText>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
-              onPress={() => toggleHabit('roomTemp')}
-              disabled={isDayCompleted}
-            >
-              <View style={[styles.checkbox, habits.roomTemp && styles.checkboxChecked]}>
-                {habits.roomTemp && <View style={styles.checkboxFill} />}
-              </View>
-              <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
-                Set room temperature to 60-67°F(15-19°C)
-              </ThemedText>
-            </TouchableOpacity>
+            ))}
           </View>
         </ThemedView>
 
-        {(didWindDownRoutine || (avoidCaffeineReminder && avoidCaffeineHours > 0) || (avoidLateEatingReminder && avoidLateEatingHours > 0)) && (
+        <ThemedView style={styles.sectionContainer}>
+          <ThemedText type="title">Tasks for Today</ThemedText>
+
           <ThemedView style={styles.subSectionContainer}>
-            <ThemedText type="subtitle">Bonus Sleep Habits</ThemedText>
+            <ThemedText type="subtitle">Mandatory Sleep Habits</ThemedText>
             <View style={styles.checklist}>
-              {didWindDownRoutine && (
-                <TouchableOpacity
-                  style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
-                  onPress={() => toggleHabit('didWindDown')}
-                  disabled={isDayCompleted}
-                >
-                  <View style={[styles.checkbox, habits.didWindDown && styles.checkboxChecked]}>
-                    {habits.didWindDown && <View style={styles.checkboxFill} />}
-                  </View>
-                  <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
-                    Did wind-down routine (e.g., yoga, reading, meditation)
-                  </ThemedText>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+                onPress={() => toggleHabit('goToBed')}
+                disabled={isDayCompleted}
+              >
+                <View style={[styles.checkbox, habits.goToBed && styles.checkboxChecked]}>
+                  {habits.goToBed && <View style={styles.checkboxFill} />}
+                </View>
+                <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
+                  Go to bed at {bedtime ? formatTime(bedtime) : '10:00 PM'}
+                </ThemedText>
+              </TouchableOpacity>
 
-              {avoidCaffeineReminder && avoidCaffeineHours > 0 && (
-                <TouchableOpacity
-                  style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
-                  onPress={() => toggleHabit('avoidCaffeine')}
-                  disabled={isDayCompleted}
-                >
-                  <View style={[styles.checkbox, habits.avoidCaffeine && styles.checkboxChecked]}>
-                    {habits.avoidCaffeine && <View style={styles.checkboxFill} />}
-                  </View>
-                  <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
-                    Avoided caffeine, nicotine, alcohol ({formatDuration(avoidCaffeineHours, 'hours')} before bed)
-                  </ThemedText>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+                onPress={() => toggleHabit('avoidBlueLight')}
+                disabled={isDayCompleted}
+              >
+                <View style={[styles.checkbox, habits.avoidBlueLight && styles.checkboxChecked]}>
+                  {habits.avoidBlueLight && <View style={styles.checkboxFill} />}
+                </View>
+                <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
+                  Avoided bluelight (no phones, tablets, etc, {formatDuration(blueLightMinutes, 'minutes')} before bed)
+                </ThemedText>
+              </TouchableOpacity>
 
-              {avoidLateEatingReminder && avoidLateEatingHours > 0 && (
-                <TouchableOpacity
-                  style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
-                  onPress={() => toggleHabit('avoidLateEating')}
-                  disabled={isDayCompleted}
-                >
-                  <View style={[styles.checkbox, habits.avoidLateEating && styles.checkboxChecked]}>
-                    {habits.avoidLateEating && <View style={styles.checkboxFill} />}
-                  </View>
-                  <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
-                    Avoided late night eating ({formatDuration(avoidLateEatingHours, 'hours')} before bed)
-                  </ThemedText>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+                onPress={() => toggleHabit('roomTemp')}
+                disabled={isDayCompleted}
+              >
+                <View style={[styles.checkbox, habits.roomTemp && styles.checkboxChecked]}>
+                  {habits.roomTemp && <View style={styles.checkboxFill} />}
+                </View>
+                <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
+                  Set room temperature to 60-67°F(15-19°C)
+                </ThemedText>
+              </TouchableOpacity>
             </View>
           </ThemedView>
-        )}
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[
-              styles.completeButton,
-              (isDayCompleted || !Object.values({
-                goToBed: habits.goToBed,
-                avoidBlueLight: habits.avoidBlueLight,
-                roomTemp: habits.roomTemp,
-              }).every((habit) => habit)) && styles.completeButtonDisabled,
-            ]}
-            onPress={handleCompleteDay}
-            disabled={isDayCompleted || !Object.values({
-              goToBed: habits.goToBed,
-              avoidBlueLight: habits.avoidBlueLight,
-              roomTemp: habits.roomTemp,
-            }).every((habit) => habit)}
-          >
-            <ThemedText
+          {(didWindDownRoutine || (avoidCaffeineReminder && avoidCaffeineHours > 0) || (avoidLateEatingReminder && avoidLateEatingHours > 0)) && (
+            <ThemedView style={styles.subSectionContainer}>
+              <ThemedText type="subtitle">Bonus Sleep Habits</ThemedText>
+              <View style={styles.checklist}>
+                {didWindDownRoutine && (
+                  <TouchableOpacity
+                    style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+                    onPress={() => toggleHabit('didWindDown')}
+                    disabled={isDayCompleted}
+                  >
+                    <View style={[styles.checkbox, habits.didWindDown && styles.checkboxChecked]}>
+                      {habits.didWindDown && <View style={styles.checkboxFill} />}
+                    </View>
+                    <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
+                      Did wind-down routine (e.g., yoga, reading, meditation)
+                    </ThemedText>
+                  </TouchableOpacity>
+                )}
+
+                {avoidCaffeineReminder && avoidCaffeineHours > 0 && (
+                  <TouchableOpacity
+                    style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+                    onPress={() => toggleHabit('avoidCaffeine')}
+                    disabled={isDayCompleted}
+                  >
+                    <View style={[styles.checkbox, habits.avoidCaffeine && styles.checkboxChecked]}>
+                      {habits.avoidCaffeine && <View style={styles.checkboxFill} />}
+                    </View>
+                    <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
+                      Avoided caffeine, nicotine, alcohol ({formatDuration(avoidCaffeineHours, 'hours')} before bed)
+                    </ThemedText>
+                  </TouchableOpacity>
+                )}
+
+                {avoidLateEatingReminder && avoidLateEatingHours > 0 && (
+                  <TouchableOpacity
+                    style={[styles.checklistItem, isDayCompleted && styles.disabledChecklistItem]}
+                    onPress={() => toggleHabit('avoidLateEating')}
+                    disabled={isDayCompleted}
+                  >
+                    <View style={[styles.checkbox, habits.avoidLateEating && styles.checkboxChecked]}>
+                      {habits.avoidLateEating && <View style={styles.checkboxFill} />}
+                    </View>
+                    <ThemedText style={[styles.habitText, isDayCompleted && styles.disabledText]}>
+                      Avoided late night eating ({formatDuration(avoidLateEatingHours, 'hours')} before bed)
+                    </ThemedText>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </ThemedView>
+          )}
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
               style={[
-                styles.completeButtonText,
+                styles.completeButton,
                 (isDayCompleted || !Object.values({
                   goToBed: habits.goToBed,
                   avoidBlueLight: habits.avoidBlueLight,
                   roomTemp: habits.roomTemp,
-                }).every((habit) => habit)) && styles.completeButtonTextDisabled,
+                }).every((habit) => habit)) && styles.completeButtonDisabled,
               ]}
+              onPress={handleCompleteDay}
+              disabled={isDayCompleted || !Object.values({
+                goToBed: habits.goToBed,
+                avoidBlueLight: habits.avoidBlueLight,
+                roomTemp: habits.roomTemp,
+              }).every((habit) => habit)}
             >
-              Complete Day
-            </ThemedText>
-          </TouchableOpacity>
-
-          {isDevMode && (
-            <>
-              <TouchableOpacity
-                style={styles.resetButton}
-                onPress={handleResetStreak}
+              <ThemedText
+                style={[
+                  styles.completeButtonText,
+                  (isDayCompleted || !Object.values({
+                    goToBed: habits.goToBed,
+                    avoidBlueLight: habits.avoidBlueLight,
+                    roomTemp: habits.roomTemp,
+                  }).every((habit) => habit)) && styles.completeButtonTextDisabled,
+                ]}
               >
-                <ThemedText style={styles.resetButtonText}>
-                  Reset Streak
-                </ThemedText>
-              </TouchableOpacity>
+                Complete Day
+              </ThemedText>
+            </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.datePickerButton}
-                onPress={() => {
-                  console.log('Opening Date Picker, showDatePicker:', showDatePicker);
-                  setShowDatePicker(true);
-                }}
-              >
-                <ThemedText style={styles.datePickerButtonText}>
-                  Set Last Completion Date: {lastCompletionDate || 'Not Set'}
-                </ThemedText>
-              </TouchableOpacity>
+            {isDevMode && (
+              <>
+                <TouchableOpacity
+                  style={styles.resetButton}
+                  onPress={handleResetStreak}
+                >
+                  <ThemedText style={styles.resetButtonText}>
+                    Reset Streak
+                  </ThemedText>
+                </TouchableOpacity>
 
-              {showDatePicker && (
-                Platform.OS === 'ios' ? (
-                  <Modal
-                    transparent={true}
-                    animationType="slide"
-                    visible={showDatePicker}
-                    onRequestClose={() => {
-                      console.log('Modal Closed');
-                      setShowDatePicker(false);
-                    }}
-                  >
-                    <View style={styles.modalOverlay}>
-                      <View style={styles.modalContent}>
-                        <DateTimePicker
-                          value={tempDate}
-                          mode="date"
-                          display="spinner"
-                          onChange={onChangeDate}
-                          textColor={Colors.light.text}
-                        />
-                        <View style={styles.modalButtonContainer}>
-                          <TouchableOpacity
-                            style={styles.cancelButton}
-                            onPress={() => setShowDatePicker(false)}
-                          >
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.doneButton}
-                            onPress={handleDateConfirm}
-                          >
-                            <Text style={styles.doneButtonText}>Done</Text>
-                          </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.datePickerButton}
+                  onPress={() => {
+                    console.log('Opening Date Picker, showDatePicker:', showDatePicker);
+                    setShowDatePicker(true);
+                  }}
+                >
+                  <ThemedText style={styles.datePickerButtonText}>
+                    Set Last Completion Date: {lastCompletionDate || 'Not Set'}
+                  </ThemedText>
+                </TouchableOpacity>
+
+                {showDatePicker && (
+                  Platform.OS === 'ios' ? (
+                    <Modal
+                      transparent={true}
+                      animationType="slide"
+                      visible={showDatePicker}
+                      onRequestClose={() => {
+                        console.log('Modal Closed');
+                        setShowDatePicker(false);
+                      }}
+                    >
+                      <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                          <DateTimePicker
+                            value={tempDate}
+                            mode="date"
+                            display="spinner"
+                            onChange={onChangeDate}
+                            textColor={Colors.light.text}
+                          />
+                          <View style={styles.modalButtonContainer}>
+                            <TouchableOpacity
+                              style={styles.cancelButton}
+                              onPress={() => setShowDatePicker(false)}
+                            >
+                              <Text style={styles.cancelButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.doneButton}
+                              onPress={handleDateConfirm}
+                            >
+                              <Text style={styles.doneButtonText}>Done</Text>
+                            </TouchableOpacity>
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  </Modal>
-                ) : (
-                  <DateTimePicker
-                    value={tempDate}
-                    mode="date"
-                    display="default"
-                    onChange={onChangeDate}
-                  />
-                )
-              )}
-            </>
-          )}
-        </View>
-      </ThemedView>
-    </ParallaxScrollView>
+                    </Modal>
+                  ) : (
+                    <DateTimePicker
+                      value={tempDate}
+                      mode="date"
+                      display="default"
+                      onChange={onChangeDate}
+                    />
+                  )
+                )}
+              </>
+            )}
+          </View>
+        </ThemedView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: Colors.light.background, // Match the background color of ThemedView
+  },
+  scrollViewContent: {
+    paddingBottom: 20, // Add padding at the bottom for better scrolling
+  },
   sectionContainer: {
     gap: 8,
     marginBottom: 16,
+    paddingHorizontal: 16, // Add padding to match the layout in the screenshot
+    paddingTop: 16, // Add top padding for spacing below the status bar
   },
   subSectionContainer: {
     marginTop: 16,
