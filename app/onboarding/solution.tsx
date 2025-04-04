@@ -17,9 +17,9 @@ export default function SolutionScreen() {
   const handleGetStarted = async () => {
     try {
       if (__DEV__) {
-        await showPaywall(SUPERWALL_TRIGGERS.ONBOARDING);
         setIsOnboarded(true);
       } else {
+        await showPaywall(SUPERWALL_TRIGGERS.ONBOARDING);
         setIsOnboarded(true);
       }
     } catch (error) {
