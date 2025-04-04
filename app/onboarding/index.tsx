@@ -24,14 +24,9 @@ export default function WelcomeScreen() {
             <Image 
               source={require('../../assets/images/AppIcons/ios.xcassets/1024.png')}
             />
-            <ThemedText type="title" style={styles.title}>
-              Sleepr
+            <ThemedText style={styles.subtitle}>
+              Your Sleep Habit Companion for Better Sleep
             </ThemedText>
-            <View style={styles.subtitleContainer}>
-              <ThemedText style={styles.subtitle}>
-                Your Sleep Habit Companion for Better Sleep
-              </ThemedText>
-            </View>
           </View>
 
           <TouchableOpacity style={styles.button} onPress={handleNext}>
