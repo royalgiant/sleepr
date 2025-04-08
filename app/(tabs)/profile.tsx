@@ -5,12 +5,14 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect, useRef } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useColorScheme } from 'react-native';
 
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
 
 export default function SettingsScreen() {
+  const colorScheme = useColorScheme();
   const [bedtime, setBedtime] = useState<Date>(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
@@ -236,7 +238,7 @@ export default function SettingsScreen() {
         },
       });
     }
-  
+
     // Avoid Caffeine, Nicotine, Alcohol Reminder
     if (avoidCaffeineReminder && avoidCaffeineHours > 0) {
       const avoidCaffeineTime = new Date(bedtime);
@@ -373,346 +375,348 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="title">Sleep Settings</ThemedText>
-        </ThemedView>
-
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Mandatory Sleep Habits</ThemedText>
-        </ThemedView>
-
-        {/* Bedtime Section */}
-        <ThemedView style={styles.section}>
-          <ThemedText type="subtitle" style={styles.smallerText}>Bedtime</ThemedText>
-          <TouchableOpacity
-            style={styles.timePickerButton}
-            onPress={() => setShowTimePicker(true)}
-          >
-            <ThemedText>{formatTime(bedtime)}</ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
-
-        {/* Avoid Blue Light Reminder Section */}
-        <ThemedView style={styles.section}>
-          <ThemedView style={styles.toggleContainer}>
-            <View style={styles.labelContainer}>
-              <ThemedText type="subtitle" style={styles.smallerText}>
-                Avoid Blue Light Reminder
-              </ThemedText>
-            </View>
-            <Switch
-              value={blueLightReminder}
-              onValueChange={(value) => setBlueLightReminder(value)}
-            />
+      <ThemedView style={styles.fullScreenContainer}>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <ThemedView style={styles.titleContainer}>
+            <ThemedText type="title">Sleep Settings</ThemedText>
           </ThemedView>
-          {blueLightReminder && (
+
+          <ThemedView style={styles.titleContainer}>
+            <ThemedText type="subtitle">Mandatory Sleep Habits</ThemedText>
+          </ThemedView>
+
+          {/* Bedtime Section */}
+          <ThemedView style={styles.section}>
+            <ThemedText type="subtitle" style={styles.smallerText}>Bedtime</ThemedText>
             <TouchableOpacity
-              style={styles.timePickerButton}
-              onPress={() => setShowBlueLightPicker(true)}
+              style={[styles.timePickerButton, { borderColor: Colors[colorScheme].tint }]}
+              onPress={() => setShowTimePicker(true)}
             >
-              <ThemedText>{formatDuration(blueLightMinutes, 'minutes')}</ThemedText>
+              <ThemedText>{formatTime(bedtime)}</ThemedText>
             </TouchableOpacity>
+          </ThemedView>
+
+          {/* Avoid Blue Light Reminder Section */}
+          <ThemedView style={styles.section}>
+            <ThemedView style={styles.toggleContainer}>
+              <View style={styles.labelContainer}>
+                <ThemedText type="subtitle" style={styles.smallerText}>
+                  Avoid Blue Light Reminder
+                </ThemedText>
+              </View>
+              <Switch
+                value={blueLightReminder}
+                onValueChange={(value) => setBlueLightReminder(value)}
+              />
+            </ThemedView>
+            {blueLightReminder && (
+              <TouchableOpacity
+                style={[styles.timePickerButton, { borderColor: Colors[colorScheme].tint }]}
+                onPress={() => setShowBlueLightPicker(true)}
+              >
+                <ThemedText>{formatDuration(blueLightMinutes, 'minutes')}</ThemedText>
+              </TouchableOpacity>
+            )}
+          </ThemedView>
+
+          {/* Room Temperature Reminder Section */}
+          <ThemedView style={styles.section}>
+            <ThemedView style={styles.toggleContainer}>
+              <View style={styles.labelContainer}>
+                <ThemedText type="subtitle" style={styles.smallerText}>
+                  Room Temperature Reminder
+                </ThemedText>
+              </View>
+              <Switch
+                value={roomTempReminder}
+                onValueChange={(value) => setRoomTempReminder(value)}
+              />
+            </ThemedView>
+            {roomTempReminder && (
+              <TouchableOpacity
+                style={[styles.timePickerButton, { borderColor: Colors[colorScheme].tint }]}
+                onPress={() => setShowRoomTempPicker(true)}
+              >
+                <ThemedText>{formatDuration(roomTempMinutes, 'minutes')}</ThemedText>
+              </TouchableOpacity>
+            )}
+          </ThemedView>
+
+          <ThemedView style={styles.titleContainer}>
+            <ThemedText type="subtitle">More Sleep Habits & Reminders</ThemedText>
+          </ThemedView>
+
+          {/* Did Wind-Down Routine Section */}
+          <ThemedView style={styles.section}>
+            <ThemedView style={styles.toggleContainer}>
+              <View style={styles.labelContainer}>
+                <ThemedText type="subtitle" style={styles.smallerText}>
+                  Did Wind-Down Routine (e.g., yoga, meditation, etc.)
+                </ThemedText>
+              </View>
+              <Switch
+                value={didWindDownRoutine}
+                onValueChange={(value) => setDidWindDownRoutine(value)}
+              />
+            </ThemedView>
+          </ThemedView>
+
+          {/* Avoid Caffeine, Nicotine, Alcohol Reminder Section */}
+          <ThemedView style={styles.section}>
+            <ThemedView style={styles.toggleContainer}>
+              <View style={styles.labelContainer}>
+                <ThemedText type="subtitle" style={styles.smallerText}>
+                  Avoid Caffeine, Nicotine, Alcohol
+                </ThemedText>
+              </View>
+              <Switch
+                value={avoidCaffeineReminder}
+                onValueChange={(value) => setAvoidCaffeineReminder(value)}
+              />
+            </ThemedView>
+            {avoidCaffeineReminder && (
+              <TouchableOpacity
+                style={[styles.timePickerButton, { borderColor: Colors[colorScheme].tint }]}
+                onPress={() => setShowAvoidCaffeinePicker(true)}
+              >
+                <ThemedText>{formatDuration(avoidCaffeineHours, 'hours')}</ThemedText>
+              </TouchableOpacity>
+            )}
+          </ThemedView>
+
+          {/* Avoid Late Night Eating Reminder Section */}
+          <ThemedView style={styles.lastSection}>
+            <ThemedView style={styles.toggleContainer}>
+              <View style={styles.labelContainer}>
+                <ThemedText type="subtitle" style={styles.smallerText}>
+                  Avoid Late Night Eating
+                </ThemedText>
+              </View>
+              <Switch
+                value={avoidLateEatingReminder}
+                onValueChange={(value) => setAvoidLateEatingReminder(value)}
+              />
+            </ThemedView>
+            {avoidLateEatingReminder && (
+              <TouchableOpacity
+                style={[styles.timePickerButton, { borderColor: Colors[colorScheme].tint }]}
+                onPress={() => setShowAvoidLateEatingPicker(true)}
+              >
+                <ThemedText>{formatDuration(avoidLateEatingHours, 'hours')}</ThemedText>
+              </TouchableOpacity>
+            )}
+          </ThemedView>
+
+          {/* Permission Prompt */}
+          {showPermissionPrompt && (
+            <ThemedView style={[styles.permissionPrompt, { backgroundColor: colorScheme === 'dark' ? '#4B3A1B' : '#FFF3CD' }]}>
+              <ThemedText style={[styles.permissionText, { color: colorScheme === 'dark' ? '#FFD700' : '#856404' }]}>
+                Notifications are required for bedtime reminders. Please enable them to receive alerts.
+              </ThemedText>
+              <TouchableOpacity
+                style={[styles.permissionButton, { backgroundColor: Colors[colorScheme].tint }]}
+                onPress={async () => {
+                  const hasPermission = await requestNotificationPermissions();
+                  if (hasPermission) {
+                    await scheduleBedtimeNotifications(bedtime);
+                  } else {
+                    Alert.alert(
+                      'Enable Notifications',
+                      'You can enable notifications in your device settings.',
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        {
+                          text: 'Open Settings',
+                          onPress: () => Linking.openSettings(),
+                        },
+                      ]
+                    );
+                  }
+                }}
+              >
+                <ThemedText style={styles.permissionButtonText}>Enable Notifications</ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
           )}
-        </ThemedView>
 
-        {/* Room Temperature Reminder Section */}
-        <ThemedView style={styles.section}>
-          <ThemedView style={styles.toggleContainer}>
-            <View style={styles.labelContainer}>
-              <ThemedText type="subtitle" style={styles.smallerText}>
-                Room Temperature Reminder
-              </ThemedText>
-            </View>
-            <Switch
-              value={roomTempReminder}
-              onValueChange={(value) => setRoomTempReminder(value)}
-            />
-          </ThemedView>
-          {roomTempReminder && (
-            <TouchableOpacity
-              style={styles.timePickerButton}
-              onPress={() => setShowRoomTempPicker(true)}
-            >
-              <ThemedText>{formatDuration(roomTempMinutes, 'minutes')}</ThemedText>
-            </TouchableOpacity>
+          {/* Bedtime Picker Modal */}
+          {showTimePicker && (
+            Platform.OS === 'ios' ? (
+              <Modal
+                transparent={true}
+                animationType="slide"
+                visible={showTimePicker}
+                onRequestClose={() => setShowTimePicker(false)}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
+                    <DateTimePicker
+                      value={bedtime}
+                      mode="time"
+                      display="spinner"
+                      onChange={onChangeTime}
+                      textColor={Colors[colorScheme].text}
+                    />
+                    <TouchableOpacity
+                      style={[styles.doneButton, { backgroundColor: '#0A7EA4' }]}
+                      onPress={() => setShowTimePicker(false)}
+                    >
+                      <ThemedText style={styles.doneButtonText}>Done</ThemedText>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
+            ) : (
+              <DateTimePicker
+                value={bedtime}
+                mode="time"
+                display="default"
+                onChange={onChangeTime}
+              />
+            )
           )}
-        </ThemedView>
 
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">More Sleep Habits & Reminders</ThemedText>
-        </ThemedView>
-
-        {/* Did Wind-Down Routine Section */}
-        <ThemedView style={styles.section}>
-          <ThemedView style={styles.toggleContainer}>
-            <View style={styles.labelContainer}>
-              <ThemedText type="subtitle" style={styles.smallerText}>
-                Did Wind-Down Routine (e.g., yoga, meditation, etc.)
-              </ThemedText>
-            </View>
-            <Switch
-              value={didWindDownRoutine}
-              onValueChange={(value) => setDidWindDownRoutine(value)}
-            />
-          </ThemedView>
-        </ThemedView>
-
-        {/* Avoid Caffeine, Nicotine, Alcohol Reminder Section */}
-        <ThemedView style={styles.section}>
-          <ThemedView style={styles.toggleContainer}>
-            <View style={styles.labelContainer}>
-              <ThemedText type="subtitle" style={styles.smallerText}>
-                Avoid Caffeine, Nicotine, Alcohol
-              </ThemedText>
-            </View>
-            <Switch
-              value={avoidCaffeineReminder}
-              onValueChange={(value) => setAvoidCaffeineReminder(value)}
-            />
-          </ThemedView>
-          {avoidCaffeineReminder && (
-            <TouchableOpacity
-              style={styles.timePickerButton}
-              onPress={() => setShowAvoidCaffeinePicker(true)}
-            >
-              <ThemedText>{formatDuration(avoidCaffeineHours, 'hours')}</ThemedText>
-            </TouchableOpacity>
-          )}
-        </ThemedView>
-
-        {/* Avoid Late Night Eating Reminder Section */}
-        <ThemedView style={styles.lastSection}>
-          <ThemedView style={styles.toggleContainer}>
-            <View style={styles.labelContainer}>
-              <ThemedText type="subtitle" style={styles.smallerText}>
-                Avoid Late Night Eating
-              </ThemedText>
-            </View>
-            <Switch
-              value={avoidLateEatingReminder}
-              onValueChange={(value) => setAvoidLateEatingReminder(value)}
-            />
-          </ThemedView>
-          {avoidLateEatingReminder && (
-            <TouchableOpacity
-              style={styles.timePickerButton}
-              onPress={() => setShowAvoidLateEatingPicker(true)}
-            >
-              <ThemedText>{formatDuration(avoidLateEatingHours, 'hours')}</ThemedText>
-            </TouchableOpacity>
-          )}
-        </ThemedView>
-
-        {/* Permission Prompt */}
-        {showPermissionPrompt && (
-          <ThemedView style={styles.permissionPrompt}>
-            <ThemedText style={styles.permissionText}>
-              Notifications are required for bedtime reminders. Please enable them to receive alerts.
-            </ThemedText>
-            <TouchableOpacity
-              style={styles.permissionButton}
-              onPress={async () => {
-                const hasPermission = await requestNotificationPermissions();
-                if (hasPermission) {
-                  await scheduleBedtimeNotifications(bedtime);
-                } else {
-                  Alert.alert(
-                    'Enable Notifications',
-                    'You can enable notifications in your device settings.',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      {
-                        text: 'Open Settings',
-                        onPress: () => Linking.openSettings(),
-                      },
-                    ]
-                  );
-                }
-              }}
-            >
-              <ThemedText style={styles.permissionButtonText}>Enable Notifications</ThemedText>
-            </TouchableOpacity>
-          </ThemedView>
-        )}
-
-        {/* Bedtime Picker Modal */}
-        {showTimePicker && (
-          Platform.OS === 'ios' ? (
+          {/* Blue Light Reminder Picker Modal (now minutes only, 0 to 60) */}
+          {showBlueLightPicker && (
             <Modal
               transparent={true}
               animationType="slide"
-              visible={showTimePicker}
-              onRequestClose={() => setShowTimePicker(false)}
+              visible={showBlueLightPicker}
+              onRequestClose={() => setShowBlueLightPicker(false)}
             >
               <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                  <DateTimePicker
-                    value={bedtime}
-                    mode="time"
-                    display="spinner"
-                    onChange={onChangeTime}
-                    textColor={Colors.light.text}
-                  />
+                <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
+                  <ThemedText type="subtitle" style={styles.smallerText}>Set Blue Light Reminder Time</ThemedText>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      style={styles.widerPicker}
+                      selectedValue={blueLightMinutes}
+                      onValueChange={(itemValue) => setBlueLightMinutes(itemValue)}
+                    >
+                      {[...Array(61).keys()].map((minute) => (
+                        <Picker.Item key={minute} label={`${minute} minutes`} value={minute} />
+                      ))}
+                    </Picker>
+                  </View>
                   <TouchableOpacity
-                    style={styles.doneButton}
-                    onPress={() => setShowTimePicker(false)}
+                    style={[styles.doneButton, { backgroundColor: '#0A7EA4' }]}
+                    onPress={() => setShowBlueLightPicker(false)}
                   >
                     <ThemedText style={styles.doneButtonText}>Done</ThemedText>
                   </TouchableOpacity>
                 </View>
               </View>
             </Modal>
-          ) : (
-            <DateTimePicker
-              value={bedtime}
-              mode="time"
-              display="default"
-              onChange={onChangeTime}
-            />
-          )
-        )}
+          )}
 
-        {/* Blue Light Reminder Picker Modal (now minutes only, 0 to 60) */}
-        {showBlueLightPicker && (
-          <Modal
-            transparent={true}
-            animationType="slide"
-            visible={showBlueLightPicker}
-            onRequestClose={() => setShowBlueLightPicker(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <ThemedText type="subtitle" style={styles.smallerText}>Set Blue Light Reminder Time</ThemedText>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    style={styles.widerPicker}
-                    selectedValue={blueLightMinutes}
-                    onValueChange={(itemValue) => setBlueLightMinutes(itemValue)}
+          {/* Room Temperature Reminder Picker Modal */}
+          {showRoomTempPicker && (
+            <Modal
+              transparent={true}
+              animationType="slide"
+              visible={showRoomTempPicker}
+              onRequestClose={() => setShowRoomTempPicker(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
+                  <ThemedText type="subtitle" style={styles.smallerText}>Set Room Temperature Reminder Time</ThemedText>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      style={styles.widerPicker}
+                      selectedValue={roomTempMinutes}
+                      onValueChange={(itemValue) => setRoomTempMinutes(itemValue)}
+                    >
+                      {[...Array(61).keys()].map((minute) => (
+                        <Picker.Item key={minute} label={`${minute} minutes`} value={minute} />
+                      ))}
+                    </Picker>
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.doneButton, { backgroundColor: '#0A7EA4' }]}
+                    onPress={() => setShowRoomTempPicker(false)}
                   >
-                    {[...Array(61).keys()].map((minute) => (
-                      <Picker.Item key={minute} label={`${minute} minutes`} value={minute} />
-                    ))}
-                  </Picker>
+                    <ThemedText style={styles.doneButtonText}>Done</ThemedText>
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  style={styles.doneButton}
-                  onPress={() => setShowBlueLightPicker(false)}
-                >
-                  <ThemedText style={styles.doneButtonText}>Done</ThemedText>
-                </TouchableOpacity>
               </View>
-            </View>
-          </Modal>
-        )}
+            </Modal>
+          )}
 
-        {/* Room Temperature Reminder Picker Modal */}
-        {showRoomTempPicker && (
-          <Modal
-            transparent={true}
-            animationType="slide"
-            visible={showRoomTempPicker}
-            onRequestClose={() => setShowRoomTempPicker(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <ThemedText type="subtitle" style={styles.smallerText}>Set Room Temperature Reminder Time</ThemedText>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    style={styles.widerPicker}
-                    selectedValue={roomTempMinutes}
-                    onValueChange={(itemValue) => setRoomTempMinutes(itemValue)}
+          {/* Avoid Caffeine Reminder Picker Modal (now hours, 0 to 12) */}
+          {showAvoidCaffeinePicker && (
+            <Modal
+              transparent={true}
+              animationType="slide"
+              visible={showAvoidCaffeinePicker}
+              onRequestClose={() => setShowAvoidCaffeinePicker(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
+                  <ThemedText type="subtitle">Set Avoid Caffeine Reminder Time</ThemedText>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      style={styles.widerPicker}
+                      selectedValue={avoidCaffeineHours}
+                      onValueChange={(itemValue) => setAvoidCaffeineHours(itemValue)}
+                    >
+                      {[...Array(13).keys()].map((hour) => (
+                        <Picker.Item
+                          key={hour}
+                          label={hour === 0 ? '0 hrs (off)' : `${hour} hr${hour !== 1 ? 's' : ''}`}
+                          value={hour}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.doneButton, { backgroundColor: '#0A7EA4' }]}
+                    onPress={() => setShowAvoidCaffeinePicker(false)}
                   >
-                    {[...Array(61).keys()].map((minute) => (
-                      <Picker.Item key={minute} label={`${minute} minutes`} value={minute} />
-                    ))}
-                  </Picker>
+                    <ThemedText style={styles.doneButtonText}>Done</ThemedText>
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  style={styles.doneButton}
-                  onPress={() => setShowRoomTempPicker(false)}
-                >
-                  <ThemedText style={styles.doneButtonText}>Done</ThemedText>
-                </TouchableOpacity>
               </View>
-            </View>
-          </Modal>
-        )}
+            </Modal>
+          )}
 
-        {/* Avoid Caffeine Reminder Picker Modal (now hours, 0 to 12) */}
-        {showAvoidCaffeinePicker && (
-          <Modal
-            transparent={true}
-            animationType="slide"
-            visible={showAvoidCaffeinePicker}
-            onRequestClose={() => setShowAvoidCaffeinePicker(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <ThemedText type="subtitle">Set Avoid Caffeine Reminder Time</ThemedText>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    style={styles.widerPicker}
-                    selectedValue={avoidCaffeineHours}
-                    onValueChange={(itemValue) => setAvoidCaffeineHours(itemValue)}
+          {/* Avoid Late Night Eating Reminder Picker Modal (now hours, 0 to 12) */}
+          {showAvoidLateEatingPicker && (
+            <Modal
+              transparent={true}
+              animationType="slide"
+              visible={showAvoidLateEatingPicker}
+              onRequestClose={() => setShowAvoidLateEatingPicker(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
+                  <ThemedText type="subtitle">Set Avoid Late Night Eating Reminder Time</ThemedText>
+                  <View style={styles.pickerContainer}>
+                    <Picker
+                      style={styles.widerPicker}
+                      selectedValue={avoidLateEatingHours}
+                      onValueChange={(itemValue) => setAvoidLateEatingHours(itemValue)}
+                    >
+                      {[...Array(13).keys()].map((hour) => (
+                        <Picker.Item
+                          key={hour}
+                          label={hour === 0 ? '0 hrs (off)' : `${hour} hr${hour !== 1 ? 's' : ''}`}
+                          value={hour}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                  <TouchableOpacity
+                    style={[styles.doneButton, { backgroundColor: '#0A7EA4' }]}
+                    onPress={() => setShowAvoidLateEatingPicker(false)}
                   >
-                    {[...Array(13).keys()].map((hour) => (
-                      <Picker.Item
-                        key={hour}
-                        label={hour === 0 ? '0 hrs (off)' : `${hour} hr${hour !== 1 ? 's' : ''}`}
-                        value={hour}
-                      />
-                    ))}
-                  </Picker>
+                    <ThemedText style={styles.doneButtonText}>Done</ThemedText>
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  style={styles.doneButton}
-                  onPress={() => setShowAvoidCaffeinePicker(false)}
-                >
-                  <ThemedText style={styles.doneButtonText}>Done</ThemedText>
-                </TouchableOpacity>
               </View>
-            </View>
-          </Modal>
-        )}
-
-        {/* Avoid Late Night Eating Reminder Picker Modal (now hours, 0 to 12) */}
-        {showAvoidLateEatingPicker && (
-          <Modal
-            transparent={true}
-            animationType="slide"
-            visible={showAvoidLateEatingPicker}
-            onRequestClose={() => setShowAvoidLateEatingPicker(false)}
-          >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <ThemedText type="subtitle">Set Avoid Late Night Eating Reminder Time</ThemedText>
-                <View style={styles.pickerContainer}>
-                  <Picker
-                    style={styles.widerPicker}
-                    selectedValue={avoidLateEatingHours}
-                    onValueChange={(itemValue) => setAvoidLateEatingHours(itemValue)}
-                  >
-                    {[...Array(13).keys()].map((hour) => (
-                      <Picker.Item
-                        key={hour}
-                        label={hour === 0 ? '0 hrs (off)' : `${hour} hr${hour !== 1 ? 's' : ''}`}
-                        value={hour}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-                <TouchableOpacity
-                  style={styles.doneButton}
-                  onPress={() => setShowAvoidLateEatingPicker(false)}
-                >
-                  <ThemedText style={styles.doneButtonText}>Done</ThemedText>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-        )}
-      </ScrollView>
+            </Modal>
+          )}
+        </ScrollView>
+      </ThemedView>
     </SafeAreaView>
   );
 }
@@ -720,7 +724,9 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+  },
+  fullScreenContainer: {
+    flex: 1,
   },
   scrollViewContent: {
     paddingBottom: 20,
@@ -740,7 +746,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     gap: 8,
     paddingHorizontal: 16,
-    paddingBottom: 48
+    paddingBottom: 48,
   },
   toggleContainer: {
     flexDirection: 'row',
@@ -754,9 +760,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
-    backgroundColor: 'white',
     borderWidth: 1,
-    borderColor: 'black',
   },
   modalOverlay: {
     flex: 1,
@@ -764,7 +768,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: Colors.light.background,
     padding: 16,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
@@ -787,7 +790,6 @@ const styles = StyleSheet.create({
   doneButton: {
     padding: 12,
     borderRadius: 8,
-    backgroundColor: Colors.light.tint,
     alignItems: 'center',
     marginTop: 8,
     width: '100%',
@@ -800,7 +802,6 @@ const styles = StyleSheet.create({
   permissionPrompt: {
     marginTop: 16,
     padding: 16,
-    backgroundColor: '#FFF3CD',
     borderRadius: 8,
     alignItems: 'center',
     marginHorizontal: 16,
@@ -808,12 +809,10 @@ const styles = StyleSheet.create({
   permissionText: {
     textAlign: 'center',
     marginBottom: 8,
-    color: '#856404',
   },
   permissionButton: {
     padding: 12,
     borderRadius: 8,
-    backgroundColor: Colors.light.tint,
     alignItems: 'center',
   },
   permissionButtonText: {
