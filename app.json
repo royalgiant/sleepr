@@ -10,6 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "buildNumber": "38",
       "bundleIdentifier": "com.sleeprapp.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
