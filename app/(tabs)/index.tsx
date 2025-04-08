@@ -619,7 +619,6 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#ccc',
   },
   checklist: {
     marginTop: 8,

@@ -5,6 +5,7 @@ import { Audio } from 'expo-av';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
+import { useColorScheme } from 'react-native';
 
 interface AudioTrack {
   name: string;
@@ -14,6 +15,7 @@ interface AudioTrack {
 }
 
 export default function MusicScreen() {
+  const colorScheme = useColorScheme();
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -171,14 +173,14 @@ export default function MusicScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={[styles.scrollViewContent, { paddingBottom: 80 }]}>
-        <ThemedView style={styles.titleContainer}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: Colors[colorScheme].background }]}>
+      <ScrollView contentContainerStyle={[styles.scrollViewContent, { backgroundColor: Colors[colorScheme].background }]}>
+        <ThemedView style={[styles.titleContainer, { backgroundColor: Colors[colorScheme].background }]}>
           <ThemedText type="title">Sleep Music</ThemedText>
         </ThemedView>
 
         {audioTracks.map((track) => (
-          <ThemedView key={track.name} style={styles.section}>
+          <ThemedView key={track.name} style={[styles.section, { backgroundColor: Colors[colorScheme].background }]}>
             <ThemedText type="subtitle" style={styles.smallerText}>
               {track.name} {track.duration ? `(${formatTime(track.duration)})` : ''}
             </ThemedText>
@@ -227,10 +229,9 @@ export default function MusicScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.background,
   },
   scrollViewContent: {
-    paddingBottom: 20, // This will be overridden by the inline style
+    paddingBottom: 80,
   },
   titleContainer: {
     flexDirection: 'row',
@@ -243,10 +244,6 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -257,8 +254,8 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     borderRadius: 8,
-    backgroundColor: Colors.light.tint,
     marginHorizontal: 4,
+    backgroundColor: Colors.light.tint,
     alignItems: 'center',
   },
   disabledButton: {
@@ -271,7 +268,6 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     fontSize: 14,
-    color: Colors.light.text,
     opacity: 0.8,
   },
   smallerText: {
