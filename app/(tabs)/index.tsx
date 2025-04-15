@@ -59,6 +59,17 @@ export default function HomeScreen() {
       const savedAvoidLateEatingReminder = await AsyncStorage.getItem('avoidLateEatingReminder');
       const savedAvoidLateEatingHours = await AsyncStorage.getItem('avoidLateEatingHours');
 
+      try {
+        const today = new Date();
+        const completionDateToCheck = savedCompletionDate || getLocalDateString(today);
+        const didReset = await resetStreakIfNeeded(completionDateToCheck, today);
+        const finalCompletionDate = didReset ? null : completionDateToCheck;
+        console.log('Today:', today, 'savedCompletionDate:', savedCompletionDate, 'completionDateToCheck:', completionDateToCheck, "finalCompletionDate:", finalCompletionDate, "didReset:", didReset);
+        checkIfDayCompleted(finalCompletionDate || getLocalDateString(today));
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+
       if (savedHabits) {
         setHabits(JSON.parse(savedHabits));
       }
@@ -162,6 +173,65 @@ export default function HomeScreen() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  const resetStreakIfNeeded = async (completionDate: string, today: Date) => {
+    const todayDateString = getLocalDateString(today);
+    const isMonday = today.getDay() === 1;
+    console.log('resetStreakIfNeeded - Today:', todayDateString, 'Completion Date:', completionDate, 'Is Monday:', isMonday);
+  
+    if (isMonday && completionDate) {
+      // Reset if completionDate is strictly in the past (not today)
+      const shouldReset = completionDate < todayDateString;
+      console.log('Should Reset:', shouldReset, 'Completion Date < Today:', completionDate < todayDateString);
+  
+      if (shouldReset) {
+        console.log('Resetting streak because it is Monday and last completion is in the past');
+        try {
+          setHabits({
+            goToBed: false,
+            avoidBlueLight: false,
+            roomTemp: false,
+            didWindDown: false,
+            avoidCaffeine: false,
+            avoidLateEating: false,
+          });
+          setStreak([
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+          ]);
+          setLastCompletionDate(null);
+          setIsDayCompleted(false);
+          await AsyncStorage.setItem('habits', JSON.stringify({
+            goToBed: false,
+            avoidBlueLight: false,
+            roomTemp: false,
+            didWindDown: false,
+            avoidCaffeine: false,
+            avoidLateEating: false,
+          }));
+          await AsyncStorage.setItem('streak', JSON.stringify([
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+            { completedHabits: 0 },
+          ]));
+          await AsyncStorage.setItem('lastCompletionDate', '');
+        } catch (error) {
+          console.error('Error resetting streak:', error);
+        }
+        return true;
+      }
+    }
+    return false;
   };
 
   const checkIfDayCompleted = (completionDate: string) => {
@@ -294,6 +364,7 @@ export default function HomeScreen() {
 
   const handleDateConfirm = () => {
     const dateString = getLocalDateString(tempDate);
+    console.log("Date String on Simulating Last Completion Date:", dateString);
     setLastCompletionDate(dateString);
     checkIfDayCompleted(dateString);
 
@@ -710,6 +781,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     alignItems: 'center',
+    backgroundColor: 'white',
   },
   modalButtonContainer: {
     flexDirection: 'row',
