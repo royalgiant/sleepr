@@ -23,23 +23,43 @@ export default function MusicScreen() {
   const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([
     {
       name: 'Brown Noise',
-      url: 'https://f005.backblazeb2.com/file/sleepr/brown_noise.m4a',
-      description: 'A deep, soothing brown noise to help you relax and fall asleep.',
+      url: 'https://music.sleeprapp.com/brown_noise.m4a',
+      description: 'A deep, soothing brown noise to help you relax and fall asleep by masking distracting sounds.',
     },
     {
       name: 'Green Noise',
-      url: 'https://f005.backblazeb2.com/file/sleepr/green_noise.m4a',
-      description: 'A calming green noise, perfect for relaxation and sleep.',
+      url: 'https://music.sleeprapp.com/green_noise.m4a',
+      description: 'A calming green noise with a more natural sound profile, ideal for relaxation and sleep.',
     },
     {
       name: 'Pink Noise',
-      url: 'https://f005.backblazeb2.com/file/sleepr/pink_noise.m4a',
-      description: 'A balanced pink noise to promote restful sleep.',
+      url: 'https://music.sleeprapp.com/pink_noise.m4a',
+      description: 'A balanced pink noise with more low-frequency energy, often preferred for promoting restful sleep.',
     },
     {
       name: 'White Noise',
-      url: 'https://f005.backblazeb2.com/file/sleepr/white_noise.m4a',
-      description: 'A classic white noise to block out distractions and aid sleep.',
+      url: 'https://music.sleeprapp.com/white_noise.m4a',
+      description: 'A classic white noise that evenly distributes sound frequencies to effectively block out distractions and aid sleep.',
+    },
+    {
+      name: 'Delta Waves',
+      url: 'https://music.sleeprapp.com/delta_waves_10h.m4a',
+      description: 'Extended 10-hour track of delta brainwaves, associated with deep sleep and relaxation. Ideal for prolonged sleep sessions.',
+    },
+    {
+      name: 'Binaural Beats',
+      url: 'https://music.sleeprapp.com/binaural_beats_3h.m4a',
+      description: '3-hour session of binaural beats designed to induce specific brainwave frequencies for enhanced focus, relaxation, or sleep (depending on the target frequency)',
+    },
+    {
+      name: '528 Hz Healing Frequency',
+      url: 'https://music.sleeprapp.com/528hz_anti_anxiety_emotional_healing_music.m4a',
+      description: 'Music tuned to 528 Hz, often associated with emotional healing, reduced anxiety, and promoting a sense of well-being. Aids in relaxation and sleep.',
+    },
+    {
+      name: '432 Hz Deep Relaxation Music',
+      url: 'https://music.sleeprapp.com/432_hz_deep_healing_relaxation_meditation_music.m4a',
+      description: 'Deeply relaxing and meditative music tuned to 432 Hz, believed by some to resonate with a more natural and harmonious frequency, promoting tranquility and aiding sleep.',
     },
   ]);
 
