@@ -59,17 +59,6 @@ export default function HomeScreen() {
       const savedAvoidLateEatingReminder = await AsyncStorage.getItem('avoidLateEatingReminder');
       const savedAvoidLateEatingHours = await AsyncStorage.getItem('avoidLateEatingHours');
 
-      try {
-        const today = new Date();
-        const completionDateToCheck = savedCompletionDate || getLocalDateString(today);
-        const didReset = await resetStreakIfNeeded(completionDateToCheck, today);
-        const finalCompletionDate = didReset ? null : completionDateToCheck;
-        console.log('Today:', today, 'savedCompletionDate:', savedCompletionDate, 'completionDateToCheck:', completionDateToCheck, "finalCompletionDate:", finalCompletionDate, "didReset:", didReset);
-        checkIfDayCompleted(finalCompletionDate || getLocalDateString(today));
-      } catch (error) {
-        console.error('Error loading data:', error);
-      }
-
       if (savedHabits) {
         setHabits(JSON.parse(savedHabits));
       }
@@ -79,7 +68,40 @@ export default function HomeScreen() {
       if (savedCompletionDate) {
         setLastCompletionDate(savedCompletionDate);
         checkIfDayCompleted(savedCompletionDate);
+      } else {
+        setHabits({
+          goToBed: false,
+          avoidBlueLight: false,
+          roomTemp: false,
+          didWindDown: false,
+          avoidCaffeine: false,
+          avoidLateEating: false,
+        });
+        setIsDayCompleted(false);
       }
+  
+      try {
+        const today = new Date();
+        const completionDateToCheck = savedCompletionDate || getLocalDateString(today);
+        const didReset = await resetStreakIfNeeded(completionDateToCheck, today);
+        const finalCompletionDate = didReset ? null : completionDateToCheck;
+        console.log(
+          'Today:',
+          today,
+          'savedCompletionDate:',
+          savedCompletionDate,
+          'completionDateToCheck:',
+          completionDateToCheck,
+          'finalCompletionDate:',
+          finalCompletionDate,
+          'didReset:',
+          didReset
+        );
+        console.log(savedHabits);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+  
       if (savedBedtime) {
         setBedtime(new Date(savedBedtime));
       } else {
@@ -237,7 +259,6 @@ export default function HomeScreen() {
   const checkIfDayCompleted = (completionDate: string) => {
     const today = new Date();
     const todayDateString = getLocalDateString(today);
-    console.log('Today (Local):', todayDateString, 'Last Completion Date:', completionDate);
 
     const isCompleted = completionDate === todayDateString;
     setIsDayCompleted(isCompleted);
@@ -249,15 +270,6 @@ export default function HomeScreen() {
         didWindDown: false,
         avoidCaffeine: false,
         avoidLateEating: false,
-      });
-    } else {
-      setHabits({
-        goToBed: true,
-        avoidBlueLight: true,
-        roomTemp: true,
-        didWindDown: true,
-        avoidCaffeine: true,
-        avoidLateEating: true,
       });
     }
   };
