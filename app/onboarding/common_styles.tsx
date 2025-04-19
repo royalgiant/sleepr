@@ -9,7 +9,9 @@ const commonStyles = StyleSheet.create({
   },
   scrollViewContent: {
     flexGrow: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   content: {
     flex: 1,
