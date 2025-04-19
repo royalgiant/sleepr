@@ -9,12 +9,12 @@ import { useColorScheme } from 'react-native';
 import commonStyles from './common_styles';
 import SleepImage from '../../assets/images/onboarding/step_7_food.png';
 
-export default function Step5Exercise() {
+export default function Step7Food() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const textColor = colorScheme === 'dark' ? Colors.light.background : Colors.dark.background
   const handleContinue = () => {
-    // router.push('/onboarding/step_5_exercise');
+    router.push('/onboarding/step_8_daily_impacts');
   };
 
   return (

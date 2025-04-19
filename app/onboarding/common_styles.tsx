@@ -7,6 +7,10 @@ const commonStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
+  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
@@ -26,6 +30,36 @@ const commonStyles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 12,
     gap: 12,
+  },
+  checklistContainer: {
+    paddingVertical: 20,
+  },
+  listItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+  },
+  selectedListItem: {},
+  listItemText: {
+    marginLeft: 12,
+    fontSize: 14,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxInner: {
+    width: 14,
+    height: 14,
+    borderRadius: 2,
   },
   hookText: {
     fontSize: 16,

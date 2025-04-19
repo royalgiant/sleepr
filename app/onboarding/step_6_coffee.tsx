@@ -9,7 +9,7 @@ import { useColorScheme } from 'react-native';
 import commonStyles from './common_styles';
 import SleepGif from '../../assets/images/onboarding/step_6_coffee.gif';
 
-export default function Step5Exercise() {
+export default function Step6Coffee() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const textColor = colorScheme === 'dark' ? Colors.light.background : Colors.dark.background
