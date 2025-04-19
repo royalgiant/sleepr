@@ -10,6 +10,7 @@ import { StyleSheet, View, Image, TouchableOpacity, Platform, Modal } from 'reac
  import DateTimePicker from '@react-native-community/datetimepicker';
  import AsyncStorage from '@react-native-async-storage/async-storage';
  import { useState } from 'react';
+ import commonStyles from './common_styles';
 
  export default function Step2ConsistencyScreen() {
    const router = useRouter();
@@ -54,13 +55,13 @@ import { StyleSheet, View, Image, TouchableOpacity, Platform, Modal } from 'reac
    };
 
    return (
-     <ThemedView style={styles.container}>
+     <ThemedView style={commonStyles.container}>
        <StatusBar style="auto" />
-       <SafeAreaView style={styles.safeArea}>
-         <View style={styles.content}>
-           <View style={styles.main}>
-             <Image source={SleepImage} style={styles.image} resizeMode="cover" />
-             <ThemedText style={styles.questionText}>
+       <SafeAreaView style={commonStyles.safeArea}>
+         <View style={commonStyles.content}>
+           <View style={commonStyles.main}>
+             <Image source={SleepImage} style={commonStyles.image} resizeMode="cover" />
+             <ThemedText style={commonStyles.questionText}>
                Around what time do you typically like to go to bed?
              </ThemedText>
              <TouchableOpacity onPress={() => setShowTimePicker(true)}>
@@ -70,12 +71,12 @@ import { StyleSheet, View, Image, TouchableOpacity, Platform, Modal } from 'reac
              </TouchableOpacity>
            </View>
 
-           <View style={styles.buttonContainer}>
-             <TouchableOpacity style={[styles.pillButton, {
+           <View style={commonStyles.buttonContainer}>
+             <TouchableOpacity style={[commonStyles.pillButton, {
                backgroundColor: Colors[colorScheme].background,
                borderColor: textColor,
              }]} onPress={handleContinue}>
-               <ThemedText style={styles.pillButtonText}>Continue</ThemedText>
+               <ThemedText style={commonStyles.pillButtonText}>Continue</ThemedText>
              </TouchableOpacity>
            </View>
 
@@ -122,37 +123,6 @@ import { StyleSheet, View, Image, TouchableOpacity, Platform, Modal } from 'reac
  }
 
  const styles = StyleSheet.create({
-   container: {
-     flex: 1,
-   },
-   safeArea: {
-     flex: 1,
-   },
-   content: {
-     flex: 1,
-     paddingHorizontal: 24,
-     justifyContent: 'space-around',
-     paddingVertical: 48,
-   },
-   main: {
-     alignItems: 'center',
-   },
-   image: {
-     width: 300,
-     height: 150,
-   },
-   hookText: {
-     fontSize: 20,
-     textAlign: 'center',
-     marginVertical: 24,
-     lineHeight: 28,
-   },
-   questionText: {
-     fontSize: 22,
-     textAlign: 'center',
-     fontWeight: 'bold',
-     marginBottom: 16,
-   },
    bedtimeText: {
      fontSize: 28,
      fontWeight: 'bold',
@@ -160,23 +130,6 @@ import { StyleSheet, View, Image, TouchableOpacity, Platform, Modal } from 'reac
      color: '#8A7FBA',
      marginBottom: 32,
      paddingTop: 8,
-   },
-   buttonContainer: {
-     paddingHorizontal: 24,
-     paddingVertical: 12,
-     gap: 12,
-   },
-   pillButton: {
-     paddingVertical: 14,
-     paddingHorizontal: 32,
-     borderRadius: 50,
-     borderWidth: 1,
-     alignItems: 'center',
-     justifyContent: 'center',
-   },
-   pillButtonText: {
-     fontSize: 18,
-     fontWeight: 'bold',
    },
    modalOverlay: {
      flex: 1,
