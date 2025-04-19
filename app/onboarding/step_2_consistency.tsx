@@ -26,6 +26,7 @@ import { StyleSheet, View, Image, TouchableOpacity, Platform, Modal } from 'reac
    const handleContinue = async () => {
      try {
        await AsyncStorage.setItem('bedtime', bedtime.toISOString());
+       console.log('Saved to AsyncStorage: bedtime - ', bedtime);
        router.push('/onboarding/step_3_bluelight');
      } catch (error) {
        console.error('Error saving bedtime:', error);

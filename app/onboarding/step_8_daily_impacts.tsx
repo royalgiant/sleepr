@@ -56,7 +56,7 @@ export default function Step8DailyImpacts() {
             <View style={commonStyles.main}>
               <Image source={SleepImage} style={commonStyles.image} resizeMode="cover" />
               <ThemedText style={commonStyles.hookText}>
-                The Daily Cost of Poor Sleep
+                The daily cost of poor sleep
               </ThemedText>
               <ThemedText style={commonStyles.questionText}>
                 What do you find relatable throughout your day?
