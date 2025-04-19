@@ -20,7 +20,7 @@ const commonStyles = StyleSheet.create({
   },
   image: {
     width: 300,
-    height: 150,
+    height: 200,
   },
   buttonContainer: {
     paddingHorizontal: 24,
@@ -28,7 +28,7 @@ const commonStyles = StyleSheet.create({
     gap: 12,
   },
   hookText: {
-    fontSize: 20,
+    fontSize: 16,
     textAlign: 'center',
     marginVertical: 12,
     lineHeight: 28,

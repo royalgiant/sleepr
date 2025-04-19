@@ -7,14 +7,14 @@ import { StatusBar } from 'expo-status-bar';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 import commonStyles from './common_styles';
-import SleepImage from '../../assets/images/onboarding/step_4_temperature.png';
+import SleepGif from '../../assets/images/onboarding/step_6_coffee.gif';
 
-export default function Step4Tempature() {
+export default function Step5Exercise() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const textColor = colorScheme === 'dark' ? Colors.light.background : Colors.dark.background
   const handleContinue = () => {
-    router.push('/onboarding/step_5_exercise');
+    router.push('/onboarding/step_7_food');
   };
 
   return (
@@ -23,12 +23,12 @@ export default function Step4Tempature() {
       <SafeAreaView style={commonStyles.safeArea}>
         <View style={commonStyles.content}>
           <View style={commonStyles.main}>
-            <Image source={SleepImage} style={commonStyles.image} resizeMode="cover" />
+            <Image source={SleepGif} style={commonStyles.image} resizeMode="cover" />
             <ThemedText style={commonStyles.hookText}>
-              FYI. Bedroom temperature matters a lot!
+              On average, it takes 5 hours for half of the caffeine to leave our bodies!
             </ThemedText>
             <ThemedText style={commonStyles.questionText}>
-              Do you usually keep your bedroom cool while you sleep?
+              Do you often drink coffee or alcohol leading up to bedtime?
             </ThemedText>
           </View>
 
@@ -37,13 +37,13 @@ export default function Step4Tempature() {
               backgroundColor: Colors[colorScheme].background,
               borderColor: textColor,
             }]} onPress={handleContinue}>
-              <ThemedText style={commonStyles.pillButtonText}>Yes</ThemedText>
+              <ThemedText style={commonStyles.pillButtonText}>Often</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity style={[commonStyles.pillButton, {
               backgroundColor: Colors[colorScheme].background,
               borderColor: textColor,
             }]} onPress={handleContinue}>
-              <ThemedText style={commonStyles.pillButtonText}>I try to</ThemedText>
+              <ThemedText style={commonStyles.pillButtonText}>Sometimes</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity style={[commonStyles.pillButton, {
               backgroundColor: Colors[colorScheme].background,

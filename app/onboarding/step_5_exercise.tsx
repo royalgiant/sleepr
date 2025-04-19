@@ -7,14 +7,14 @@ import { StatusBar } from 'expo-status-bar';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from 'react-native';
 import commonStyles from './common_styles';
-import SleepImage from '../../assets/images/onboarding/step_4_temperature.png';
+import SleepImage from '../../assets/images/onboarding/step_5_exercise.png';
 
-export default function Step4Tempature() {
+export default function Step5Exercise() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const textColor = colorScheme === 'dark' ? Colors.light.background : Colors.dark.background
   const handleContinue = () => {
-    router.push('/onboarding/step_5_exercise');
+    router.push('/onboarding/step_6_coffee');
   };
 
   return (
@@ -25,10 +25,10 @@ export default function Step4Tempature() {
           <View style={commonStyles.main}>
             <Image source={SleepImage} style={commonStyles.image} resizeMode="cover" />
             <ThemedText style={commonStyles.hookText}>
-              FYI. Bedroom temperature matters a lot!
+              A little tiredness helps you fall asleep quicker!
             </ThemedText>
             <ThemedText style={commonStyles.questionText}>
-              Do you usually keep your bedroom cool while you sleep?
+              Do you engage in regular physical activity?
             </ThemedText>
           </View>
 
@@ -37,13 +37,13 @@ export default function Step4Tempature() {
               backgroundColor: Colors[colorScheme].background,
               borderColor: textColor,
             }]} onPress={handleContinue}>
-              <ThemedText style={commonStyles.pillButtonText}>Yes</ThemedText>
+              <ThemedText style={commonStyles.pillButtonText}>Yes, regularly</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity style={[commonStyles.pillButton, {
               backgroundColor: Colors[colorScheme].background,
               borderColor: textColor,
             }]} onPress={handleContinue}>
-              <ThemedText style={commonStyles.pillButtonText}>I try to</ThemedText>
+              <ThemedText style={commonStyles.pillButtonText}>Sometimes</ThemedText>
             </TouchableOpacity>
             <TouchableOpacity style={[commonStyles.pillButton, {
               backgroundColor: Colors[colorScheme].background,
