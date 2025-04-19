@@ -30,7 +30,7 @@ const commonStyles = StyleSheet.create({
   hookText: {
     fontSize: 20,
     textAlign: 'center',
-    marginVertical: 24,
+    marginVertical: 12,
     lineHeight: 28,
   },
   questionText: {

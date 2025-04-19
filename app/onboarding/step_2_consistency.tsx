@@ -26,10 +26,9 @@ import { StyleSheet, View, Image, TouchableOpacity, Platform, Modal } from 'reac
    const handleContinue = async () => {
      try {
        await AsyncStorage.setItem('bedtime', bedtime.toISOString());
-       router.push('/onboarding/step2_consistency'); // Navigate to the next onboarding step
+       router.push('/onboarding/step_3_bluelight');
      } catch (error) {
        console.error('Error saving bedtime:', error);
-       // Optionally show an error message to the user
      }
    };
 
