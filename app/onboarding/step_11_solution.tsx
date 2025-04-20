@@ -32,7 +32,7 @@ const FinalSolutionScreen = () => {
   const imageAnim = useRef(new Animated.Value(0)).current;
 
   const { height, width } = Dimensions.get('window');
-  const { showPaywall } = useSuperwall();
+  const { showPaywall, checkSubscription, isSubscribed } = useSuperwall();
   const { setIsOnboarded } = useOnboarding();
   const router = useRouter();
 
@@ -46,6 +46,20 @@ const FinalSolutionScreen = () => {
       }
     } catch (error) {
       console.error('Failed to show paywall:', error);
+    }
+  };
+
+  const handleRestorePurchases = async () => {
+    try {
+      await checkSubscription();
+      if (isSubscribed) {
+        alert('Purchases restored successfully! You have an active subscription.');
+        setIsOnboarded(true); // Let them in if subscribed
+      } else {
+        alert('No active subscriptions found to restore.');
+      }
+    } catch (error) {
+      alert('Failed to restore purchases. Please try again.');
     }
   };
 
@@ -179,6 +193,11 @@ const FinalSolutionScreen = () => {
               I'm In!
             </ThemedText>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.restoreButton} onPress={handleRestorePurchases}>
+            <ThemedText style={styles.restoreButtonText}>
+              Restore Purchases
+            </ThemedText>
+          </TouchableOpacity>
         </Animated.View>
       </ScrollView>
     </SafeAreaView>
@@ -239,6 +258,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  restoreButton: {
+    padding: 10,
+    alignItems: 'center',
+  },
+  restoreButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    textDecorationLine: 'underline',
   },
 });
 
