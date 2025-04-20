@@ -12,9 +12,39 @@ import { useColorScheme } from 'react-native';
 import commonStyles from './common_styles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Badge, darkColors } from '@/components/Badge';
-
-// Replace with the actual path to your image
 import SleepIllustration from '../../assets/images/onboarding/step_11_solution.png';
+
+const Sparkles = () => {
+  const { width, height } = Dimensions.get('window');
+  const sparkleCount = 50; // Number of sparkles
+  const sparkles = Array.from({ length: sparkleCount }).map((_, index) => ({
+    key: index,
+    left: Math.random() * width, // Random x position
+    top: Math.random() * height * 1.5, // Random y position, extended for scroll
+    size: Math.random() * 2 + 1, // Random size between 1 and 3
+    opacity: Math.random() * 0.5 + 0.3, // Random opacity between 0.3 and 0.8
+  }));
+
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {sparkles.map((sparkle) => (
+        <View
+          key={sparkle.key}
+          style={{
+            position: 'absolute',
+            left: sparkle.left,
+            top: sparkle.top,
+            width: sparkle.size,
+            height: sparkle.size,
+            backgroundColor: 'white',
+            borderRadius: sparkle.size / 2,
+            opacity: sparkle.opacity,
+          }}
+        />
+      ))}
+    </View>
+  );
+};
 
 const FinalSolutionScreen = () => {
   const [dailyImpacts, setDailyImpacts] = useState([]);
@@ -54,7 +84,7 @@ const FinalSolutionScreen = () => {
       await checkSubscription();
       if (isSubscribed) {
         alert('Purchases restored successfully! You have an active subscription.');
-        setIsOnboarded(true); // Let them in if subscribed
+        setIsOnboarded(true);
       } else {
         alert('No active subscriptions found to restore.');
       }
@@ -91,10 +121,11 @@ const FinalSolutionScreen = () => {
     }
   }, [dailyImpacts, emotionalImpacts, longTermImpacts]);
 
-  const panUpTranslateY = (animValue) => animValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [height, 0],
-  });
+  const panUpTranslateY = (animValue) =>
+    animValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: [height, 0],
+    });
 
   useEffect(() => {
     Animated.timing(imageAnim, {
@@ -148,6 +179,7 @@ const FinalSolutionScreen = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'black' }}>
+      <Sparkles />
       <ScrollView contentContainerStyle={commonStyles.scrollViewContent}>
         <Animated.Image
           source={SleepIllustration}
@@ -161,11 +193,11 @@ const FinalSolutionScreen = () => {
           resizeMode="contain"
         />
 
-        <Animated.Text style={[styles.headline, { transform: [{ translateY: panUpTranslateY(headlineAnim) }], opacity: headlineAnim, color: '#FFE81F' }]}>
+        <Animated.Text style={[styles.headline, { transform: [{ translateY: panUpTranslateY(headlineAnim) }], opacity: headlineAnim, color: '#FFE81F' },]}>
           Imagine consistently waking up feeling refreshed, focused, and energized – all by building simple, effective sleep habits.
         </Animated.Text>
 
-        <Animated.Text style={[styles.panSentence, { transform: [{ translateY: panUpTranslateY(panSentence1Anim) }], opacity: panSentence1Anim, color: '#FFE81F', marginBottom: 20 }]}>
+        <Animated.Text style={[styles.panSentence, { transform: [{ translateY: panUpTranslateY(panSentence1Anim) }], opacity: panSentence1Anim, color: '#FFE81F', marginBottom: 20 },]}>
           But here's what's stopping you from that goal:
         </Animated.Text>
 
@@ -175,28 +207,24 @@ const FinalSolutionScreen = () => {
           ))}
         </View>
 
-        <Animated.Text style={[styles.panUpText, { transform: [{ translateY: panUpTranslateY(panQuestionAnim) }], opacity: panQuestionAnim}]}>
+        <Animated.Text style={[styles.panUpText, { transform: [{ translateY: panUpTranslateY(panQuestionAnim) }], opacity: panQuestionAnim }]} >
           Don't you think life would be better well-rested?
         </Animated.Text>
 
-        <Animated.Text style={[styles.panUpText, { transform: [{ translateY: panUpTranslateY(panStatement1Anim) }], opacity: panStatement1Anim}]}>
+        <Animated.Text style={[styles.panUpText, { transform: [{ translateY: panUpTranslateY(panStatement1Anim) }], opacity: panStatement1Anim }]}>
           We've already set up your sleep habits for you.
         </Animated.Text>
 
-        <Animated.Text style={[styles.investText, { transform: [{ translateY: panUpTranslateY(panStatement2Anim) }], opacity: panStatement2Anim }]}>
+        <Animated.Text style={[ styles.investText, { transform: [{ translateY: panUpTranslateY(panStatement2Anim) }], opacity: panStatement2Anim }]}>
           Now, it's time to invest in better sleep habits for your goal, you, and your entire life.
         </Animated.Text>
 
-        <Animated.View style={{ opacity: buttonAnim, alignItems: 'center', marginTop: 20, color: '#FFE81F', }}>
-          <TouchableOpacity style={[ commonStyles.pillButton, { borderColor: textColor, borderColor: '#FFE81F' }]} onPress={handleGetStarted}>
-            <ThemedText style={[commonStyles.pillButtonText,{ color: '#FFE81F' }]}>
-              I'm In!
-            </ThemedText>
+        <Animated.View style={{ opacity: buttonAnim, alignItems: 'center', marginTop: 20 }}>
+          <TouchableOpacity style={[commonStyles.pillButton, { borderColor: textColor, borderColor: '#FFE81F' }]}onPress={handleGetStarted}>
+            <ThemedText style={[commonStyles.pillButtonText, { color: '#FFE81F' }]}>I'm In!</ThemedText>
           </TouchableOpacity>
           <TouchableOpacity style={styles.restoreButton} onPress={handleRestorePurchases}>
-            <ThemedText style={styles.restoreButtonText}>
-              Restore Purchases
-            </ThemedText>
+            <ThemedText style={styles.restoreButtonText}>Restore Purchases</ThemedText>
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
@@ -206,8 +234,8 @@ const FinalSolutionScreen = () => {
 
 const styles = StyleSheet.create({
   image: {
-    width: 200, // Adjust as needed
-    height: 150, // Adjust as needed
+    width: 200,
+    height: 150,
     opacity: 0,
     transform: [{ translateY: Dimensions.get('window').height }],
   },
