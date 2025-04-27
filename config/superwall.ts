@@ -18,6 +18,6 @@ export const createSuperwallConfig = () => {
       LogScope.Network,
     ];
   }
-
+  options.shouldPreload = true;
   return options;
 }; 

@@ -20,6 +20,7 @@ export function useSuperwall() {
   const checkSubscription = async () => {
     try {
       const status = await superwallService.getSubscriptionStatus();
+      console.log('[Superwall] CheckSubscription: Status:', JSON.stringify(status));
       setIsSubscribed(status === SubscriptionStatus.ACTIVE);
     } catch (error) {
       console.error('[Superwall] Hook subscription check failed:', error);
@@ -30,11 +31,10 @@ export function useSuperwall() {
 
   const showPaywall = async (triggerId: string) => {
     if (isLoading || Platform.OS === 'web') return;
-    
+
     try {
-      console.log("Presenting paywall")
+      console.log('[Superwall] Presenting paywall from hook for trigger:', triggerId);
       await superwallService.presentPaywall(triggerId);
-      // Refresh subscription status after paywall interaction
       await checkSubscription();
     } catch (error) {
       console.error('[Superwall] Hook failed to show paywall:', error);
@@ -47,4 +47,4 @@ export function useSuperwall() {
     showPaywall,
     checkSubscription,
   };
-} 
+}

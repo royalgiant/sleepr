@@ -14,14 +14,14 @@
       },
       "env": {
         "EXPO_PUBLIC_SUPERWALL_API_KEY_IOS": "$EXPO_PUBLIC_SUPERWALL_API_KEY_IOS",
-        "EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID": "your_android_key_here"
+        "EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID": "$EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID"
       }
     },
     "preview": {
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_SUPERWALL_API_KEY_IOS": "$EXPO_PUBLIC_SUPERWALL_API_KEY_IOS",
-        "EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID": "your_android_key_here"
+        "EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID": "$EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID"
       }
     },
     "production": {
@@ -32,7 +32,7 @@
       },
       "env": {
         "EXPO_PUBLIC_SUPERWALL_API_KEY_IOS": "$EXPO_PUBLIC_SUPERWALL_API_KEY_IOS",
-        "EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID": "your_android_key_here"
+        "EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID": "$EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID"
       }
     },
     "development-simulator": {
@@ -44,7 +44,7 @@
       "environment": "development",
       "env": {
         "EXPO_PUBLIC_SUPERWALL_API_KEY_IOS": "$EXPO_PUBLIC_SUPERWALL_API_KEY_IOS",
-        "EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID": "your_android_key_here"
+        "EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID": "$EXPO_PUBLIC_SUPERWALL_API_KEY_ANDROID"
       }
     }
   },

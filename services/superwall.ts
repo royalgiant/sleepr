@@ -41,7 +41,7 @@ class SuperwallService {
 
   async presentPaywall(triggerId: string): Promise<void> {
     try {
-      console.log('[Superwall] Presenting paywall for trigger:', triggerId);
+      console.log('[Superwall] Presenting paywall from service for trigger:', triggerId);
       await Superwall.shared.register(triggerId);
     } catch (error) {
       console.error('[Superwall] Failed to present paywall:', error);
