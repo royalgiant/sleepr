@@ -1,4 +1,4 @@
-import { StyleSheet, View, Image, Alert, Platform, Modal, Text, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Platform, Image, Alert, Modal, Text, ScrollView, SafeAreaView } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect, useCallback } from 'react';
@@ -430,7 +430,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: Colors[colorScheme].background, paddingTop: Platform.OS === 'android' ? 40 : 0 }]}>
       <ThemedView style={styles.fullScreenContainer}>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <ThemedView style={styles.sectionContainer}>

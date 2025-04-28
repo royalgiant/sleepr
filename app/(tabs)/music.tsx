@@ -1,4 +1,4 @@
-import { StyleSheet, View, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Platform, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Audio } from 'expo-av';
 
@@ -193,7 +193,7 @@ export default function MusicScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: Colors[colorScheme].background }]}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: Colors[colorScheme].background, paddingTop: Platform.OS === 'android' ? 40 : 0 }]}>
       <ScrollView contentContainerStyle={[styles.scrollViewContent, { backgroundColor: Colors[colorScheme].background }]}>
         <ThemedView style={[styles.titleContainer, { backgroundColor: Colors[colorScheme].background }]}>
           <ThemedText type="title">Sleep Music</ThemedText>

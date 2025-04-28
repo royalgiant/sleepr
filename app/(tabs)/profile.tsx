@@ -1,7 +1,6 @@
 import * as Notifications from 'expo-notifications';
-import { StyleSheet, Platform, View, Modal, Alert, Linking, Switch, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, Platform, View, Modal, Alert, Linking, Switch, ScrollView, SafeAreaView, TouchableOpacity, Button, TouchableWithoutFeedback } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect, useRef } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -374,7 +373,7 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { paddingTop: Platform.OS === 'android' ? 40 : 0 }]}>
       <ThemedView style={styles.fullScreenContainer}>
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <ThemedView style={styles.titleContainer}>
@@ -546,25 +545,39 @@ export default function SettingsScreen() {
                 transparent={true}
                 animationType="slide"
                 visible={showTimePicker}
-                onRequestClose={() => setShowTimePicker(false)}
+                onRequestClose={() => {
+                  console.log('[SettingsScreen] Bedtime Picker onRequestClose triggered');
+                  setShowTimePicker(false);
+                }}
+                statusBarTranslucent={true}
               >
-                <View style={styles.modalOverlay}>
-                  <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
-                    <DateTimePicker
-                      value={bedtime}
-                      mode="time"
-                      display="spinner"
-                      onChange={onChangeTime}
-                      textColor={Colors[colorScheme].text}
-                    />
-                    <TouchableOpacity
-                      style={[styles.doneButton, { backgroundColor: '#0A7EA4' }]}
-                      onPress={() => setShowTimePicker(false)}
-                    >
-                      <ThemedText style={styles.doneButtonText}>Done</ThemedText>
-                    </TouchableOpacity>
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    console.log('[SettingsScreen] Bedtime Picker tapped outside, closing modal');
+                    setShowTimePicker(false);
+                  }}
+                >
+                  <View style={styles.modalOverlay}>
+                    <TouchableWithoutFeedback>
+                      <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
+                        <DateTimePicker
+                          value={bedtime}
+                          mode="time"
+                          display="spinner"
+                          onChange={onChangeTime}
+                          textColor={Colors[colorScheme].text}
+                        />
+                        <Button
+                          title="Done"
+                          color="#0A7EA4"
+                          onPress={() => {
+                            setShowTimePicker(false);
+                          }}
+                        />
+                      </View>
+                    </TouchableWithoutFeedback>
                   </View>
-                </View>
+                </TouchableWithoutFeedback>
               </Modal>
             ) : (
               <DateTimePicker
@@ -582,30 +595,46 @@ export default function SettingsScreen() {
               transparent={true}
               animationType="slide"
               visible={showBlueLightPicker}
-              onRequestClose={() => setShowBlueLightPicker(false)}
+              onRequestClose={() => {
+                console.log('[SettingsScreen] Blue Light Picker onRequestClose triggered');
+                setShowBlueLightPicker(false);
+              }}
+              statusBarTranslucent={true}
             >
-              <View style={styles.modalOverlay}>
-                <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
-                  <ThemedText type="subtitle" style={styles.smallerText}>Set Blue Light Reminder Time</ThemedText>
-                  <View style={styles.pickerContainer}>
-                    <Picker
-                      style={styles.widerPicker}
-                      selectedValue={blueLightMinutes}
-                      onValueChange={(itemValue) => setBlueLightMinutes(itemValue)}
-                    >
-                      {[...Array(61).keys()].map((minute) => (
-                        <Picker.Item key={minute} label={`${minute} minutes`} value={minute} />
-                      ))}
-                    </Picker>
-                  </View>
-                  <TouchableOpacity
-                    style={[styles.doneButton, { backgroundColor: '#0A7EA4' }]}
-                    onPress={() => setShowBlueLightPicker(false)}
-                  >
-                    <ThemedText style={styles.doneButtonText}>Done</ThemedText>
-                  </TouchableOpacity>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  console.log('[SettingsScreen] Blue Light Picker tapped outside, closing modal');
+                  setShowBlueLightPicker(false);
+                }}
+              >
+                <View style={styles.modalOverlay}>
+                  <TouchableWithoutFeedback>
+                    <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
+                      <ThemedText type="subtitle" style={styles.smallerText}>Set Blue Light Reminder Time</ThemedText>
+                      <View style={styles.pickerContainer}>
+                        <Picker
+                          style={styles.widerPicker}
+                          selectedValue={blueLightMinutes}
+                          onValueChange={(itemValue) => setBlueLightMinutes(itemValue)}
+                        >
+                          {[...Array(61).keys()].map((minute) => (
+                            <Picker.Item key={minute} label={`${minute} minutes`} value={minute} />
+                          ))}
+                        </Picker>
+                      </View>
+                      <View style={{ marginTop: 24 }}>
+                        <Button
+                          title="Done"
+                          color="#0A7EA4"
+                          onPress={() => {
+                            setShowBlueLightPicker(false);
+                          }}
+                        />
+                      </View>
+                    </View>
+                  </TouchableWithoutFeedback>
                 </View>
-              </View>
+              </TouchableWithoutFeedback>
             </Modal>
           )}
 
@@ -615,30 +644,46 @@ export default function SettingsScreen() {
               transparent={true}
               animationType="slide"
               visible={showRoomTempPicker}
-              onRequestClose={() => setShowRoomTempPicker(false)}
+              onRequestClose={() => {
+                console.log('[SettingsScreen] Room Temp Picker onRequestClose triggered');
+                setShowRoomTempPicker(false);
+              }}
+              statusBarTranslucent={true}
             >
-              <View style={styles.modalOverlay}>
-                <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
-                  <ThemedText type="subtitle" style={styles.smallerText}>Set Room Temperature Reminder Time</ThemedText>
-                  <View style={styles.pickerContainer}>
-                    <Picker
-                      style={styles.widerPicker}
-                      selectedValue={roomTempMinutes}
-                      onValueChange={(itemValue) => setRoomTempMinutes(itemValue)}
-                    >
-                      {[...Array(61).keys()].map((minute) => (
-                        <Picker.Item key={minute} label={`${minute} minutes`} value={minute} />
-                      ))}
-                    </Picker>
-                  </View>
-                  <TouchableOpacity
-                    style={[styles.doneButton, { backgroundColor: '#0A7EA4' }]}
-                    onPress={() => setShowRoomTempPicker(false)}
-                  >
-                    <ThemedText style={styles.doneButtonText}>Done</ThemedText>
-                  </TouchableOpacity>
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  console.log('[SettingsScreen] Room Temp Picker tapped outside, closing modal');
+                  setShowRoomTempPicker(false);
+                }}
+              >
+                <View style={styles.modalOverlay}>
+                  <TouchableWithoutFeedback>
+                    <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
+                      <ThemedText type="subtitle" style={styles.smallerText}>Set Room Temperature Reminder Time</ThemedText>
+                      <View style={styles.pickerContainer}>
+                        <Picker
+                          style={styles.widerPicker}
+                          selectedValue={roomTempMinutes}
+                          onValueChange={(itemValue) => setRoomTempMinutes(itemValue)}
+                        >
+                          {[...Array(61).keys()].map((minute) => (
+                            <Picker.Item key={minute} label={`${minute} minutes`} value={minute} />
+                          ))}
+                        </Picker>
+                      </View>
+                      <View style={{ marginTop: 24 }}>
+                        <Button
+                          title="Done"
+                          color="#0A7EA4"
+                          onPress={() => {
+                            setShowRoomTempPicker(false);
+                          }}
+                        />
+                      </View>
+                    </View>
+                  </TouchableWithoutFeedback>
                 </View>
-              </View>
+              </TouchableWithoutFeedback>
             </Modal>
           )}
 
@@ -648,34 +693,50 @@ export default function SettingsScreen() {
               transparent={true}
               animationType="slide"
               visible={showAvoidCaffeinePicker}
-              onRequestClose={() => setShowAvoidCaffeinePicker(false)}
+              onRequestClose={() => {
+                console.log('[SettingsScreen] Avoid Caffeine Picker onRequestClose triggered');
+                setShowAvoidCaffeinePicker(false);
+              }}
+              statusBarTranslucent={true}
             >
-              <View style={styles.modalOverlay}>
-                <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
-                  <ThemedText type="subtitle">Set Avoid Caffeine Reminder Time</ThemedText>
-                  <View style={styles.pickerContainer}>
-                    <Picker
-                      style={styles.widerPicker}
-                      selectedValue={avoidCaffeineHours}
-                      onValueChange={(itemValue) => setAvoidCaffeineHours(itemValue)}
-                    >
-                      {[...Array(13).keys()].map((hour) => (
-                        <Picker.Item
-                          key={hour}
-                          label={hour === 0 ? '0 hrs (off)' : `${hour} hr${hour !== 1 ? 's' : ''}`}
-                          value={hour}
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  console.log('[SettingsScreen] Avoid Caffeine Picker tapped outside, closing modal');
+                  setShowAvoidCaffeinePicker(false);
+                }}
+              >
+                <View style={styles.modalOverlay}>
+                  <TouchableWithoutFeedback>
+                    <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
+                      <ThemedText type="subtitle" style={styles.smallerText}>Set Avoid Caffeine Reminder Time</ThemedText>
+                      <View style={styles.pickerContainer}>
+                        <Picker
+                          style={styles.widerPicker}
+                          selectedValue={avoidCaffeineHours}
+                          onValueChange={(itemValue) => setAvoidCaffeineHours(itemValue)}
+                        >
+                          {[...Array(13).keys()].map((hour) => (
+                            <Picker.Item
+                              key={hour}
+                              label={hour === 0 ? '0 hrs (off)' : `${hour} hr${hour !== 1 ? 's' : ''}`}
+                              value={hour}
+                            />
+                          ))}
+                        </Picker>
+                      </View>
+                      <View style={{ marginTop: 24 }}>
+                        <Button
+                          title="Done"
+                          color="#0A7EA4"
+                          onPress={() => {
+                            setShowAvoidCaffeinePicker(false);
+                          }}
                         />
-                      ))}
-                    </Picker>
-                  </View>
-                  <TouchableOpacity
-                    style={[styles.doneButton, { backgroundColor: '#0A7EA4' }]}
-                    onPress={() => setShowAvoidCaffeinePicker(false)}
-                  >
-                    <ThemedText style={styles.doneButtonText}>Done</ThemedText>
-                  </TouchableOpacity>
+                      </View>
+                    </View>
+                  </TouchableWithoutFeedback>
                 </View>
-              </View>
+              </TouchableWithoutFeedback>
             </Modal>
           )}
 
@@ -685,34 +746,50 @@ export default function SettingsScreen() {
               transparent={true}
               animationType="slide"
               visible={showAvoidLateEatingPicker}
-              onRequestClose={() => setShowAvoidLateEatingPicker(false)}
+              onRequestClose={() => {
+                console.log('[SettingsScreen] Avoid Late Eating Picker onRequestClose triggered');
+                setShowAvoidLateEatingPicker(false);
+              }}
+              statusBarTranslucent={true}
             >
-              <View style={styles.modalOverlay}>
-                <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
-                  <ThemedText type="subtitle">Set Avoid Late Night Eating Reminder Time</ThemedText>
-                  <View style={styles.pickerContainer}>
-                    <Picker
-                      style={styles.widerPicker}
-                      selectedValue={avoidLateEatingHours}
-                      onValueChange={(itemValue) => setAvoidLateEatingHours(itemValue)}
-                    >
-                      {[...Array(13).keys()].map((hour) => (
-                        <Picker.Item
-                          key={hour}
-                          label={hour === 0 ? '0 hrs (off)' : `${hour} hr${hour !== 1 ? 's' : ''}`}
-                          value={hour}
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  console.log('[SettingsScreen] Avoid Late Eating Picker tapped outside, closing modal');
+                  setShowAvoidLateEatingPicker(false);
+                }}
+              >
+                <View style={styles.modalOverlay}>
+                  <TouchableWithoutFeedback>
+                    <View style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]}>
+                      <ThemedText type="subtitle" style={styles.smallerText}>Set Avoid Late Night Eating Reminder Time</ThemedText>
+                      <View style={styles.pickerContainer}>
+                        <Picker
+                          style={styles.widerPicker}
+                          selectedValue={avoidLateEatingHours}
+                          onValueChange={(itemValue) => setAvoidLateEatingHours(itemValue)}
+                        >
+                          {[...Array(13).keys()].map((hour) => (
+                            <Picker.Item
+                              key={hour}
+                              label={hour === 0 ? '0 hrs (off)' : `${hour} hr${hour !== 1 ? 's' : ''}`}
+                              value={hour}
+                            />
+                          ))}
+                        </Picker>
+                      </View>
+                      <View style={{ marginTop: 24 }}>
+                        <Button
+                          title="Done"
+                          color="#0A7EA4"
+                          onPress={() => {
+                            setShowAvoidLateEatingPicker(false);
+                          }}
                         />
-                      ))}
-                    </Picker>
-                  </View>
-                  <TouchableOpacity
-                    style={[styles.doneButton, { backgroundColor: '#0A7EA4' }]}
-                    onPress={() => setShowAvoidLateEatingPicker(false)}
-                  >
-                    <ThemedText style={styles.doneButtonText}>Done</ThemedText>
-                  </TouchableOpacity>
+                      </View>
+                    </View>
+                  </TouchableWithoutFeedback>
                 </View>
-              </View>
+              </TouchableWithoutFeedback>
             </Modal>
           )}
         </ScrollView>
@@ -724,6 +801,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    paddingTop: Platform.OS === 'android' ? 40 : 0,
   },
   fullScreenContainer: {
     flex: 1,
@@ -786,18 +864,6 @@ const styles = StyleSheet.create({
   widerPicker: {
     width: 200,
     height: 150,
-  },
-  doneButton: {
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 8,
-    width: '100%',
-  },
-  doneButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   permissionPrompt: {
     marginTop: 16,
