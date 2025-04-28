@@ -370,6 +370,7 @@ export default function HomeScreen() {
       setShowDatePicker(false);
     }
     if (selectedDate) {
+      console.log("Date being set:", selectedDate)
       setTempDate(selectedDate);
     }
   };
@@ -647,7 +648,27 @@ export default function HomeScreen() {
                         value={tempDate}
                         mode="date"
                         display="default"
-                        onChange={onChangeDate}
+                        onChange={(event, selectedDate) => {
+                          console.log('Android Date Picker Changed:', selectedDate, 'Event Type:', event.type);
+                          setShowDatePicker(false); // Close the picker after selection
+                          if (event.type === 'set' && selectedDate) {
+                            // On Android, "set" event is triggered when the user presses "OK"
+                            setTempDate(selectedDate);
+                            const dateString = getLocalDateString(selectedDate);
+                            console.log("Date String on Simulating Last Completion Date (Android):", dateString);
+                            setLastCompletionDate(dateString);
+                            checkIfDayCompleted(dateString);
+
+                            const dayOfWeek = selectedDate.getDay();
+                            const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                            const completedHabitsCount = calculateCompletedHabits();
+                            setStreak((prev) => {
+                              const newStreak = [...prev];
+                              newStreak[adjustedDay] = { completedHabits: completedHabitsCount };
+                              return newStreak;
+                            });
+                          }
+                        }}
                       />
                     )
                   )}
