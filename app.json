@@ -18,10 +18,11 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/AppIcons/android/mipmap-xxxhdpi/ic_launcher.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.sleeprapp.app"
+      "package": "com.sleeprapp.app",
+      "versionCode": "1"
     },
     "web": {
       "bundler": "metro",

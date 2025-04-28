@@ -19,7 +19,7 @@ export default function MusicScreen() {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [currentTrack, setCurrentTrack] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMusic, setIsLoadingMusic] = useState(false);
   const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([
     {
       name: 'Brown Noise',
@@ -65,12 +65,12 @@ export default function MusicScreen() {
 
   const playSound = async (track: AudioTrack) => {
     try {
-      setIsLoading(true);
+      setIsLoadingMusic(true);
 
       if (sound && currentTrack === track.name && !isPlaying) {
         await sound.playAsync();
         setIsPlaying(true);
-        setIsLoading(false);
+        setIsLoadingMusic(false);
         return;
       }
 
@@ -88,10 +88,10 @@ export default function MusicScreen() {
       setSound(newSound);
       setCurrentTrack(track.name);
       setIsPlaying(true);
-      setIsLoading(false);
+      setIsLoadingMusic(false);
     } catch (error) {
       console.error(`Error playing ${track.name}:`, error);
-      setIsLoading(false);
+      setIsLoadingMusic(false);
       setIsPlaying(false);
       setCurrentTrack(null);
     }
@@ -211,10 +211,10 @@ export default function MusicScreen() {
               <TouchableOpacity
                 style={[
                   styles.controlButton,
-                  (isLoading && currentTrack === track.name) && styles.disabledButton,
+                  (isLoadingMusic && currentTrack === track.name) && styles.disabledButton,
                 ]}
                 onPress={() => playSound(track)}
-                disabled={isLoading && currentTrack === track.name}
+                disabled={isLoadingMusic && currentTrack === track.name}
               >
                 <ThemedText style={styles.buttonText}>Play</ThemedText>
               </TouchableOpacity>
