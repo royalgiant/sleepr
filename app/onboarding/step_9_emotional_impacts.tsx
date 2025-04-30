@@ -26,7 +26,6 @@ export default function step9EmotionalImpacts() {
   const colorScheme = useColorScheme();
   const textColor = colorScheme === 'dark' ? Colors.light.background : Colors.dark.background;
   const [selectedItems, setSelectedItems] = useState([]);
-  const isContinueEnabled = selectedItems.length > 0;
 
   const handleCheckboxToggle = (item) => {
     if (selectedItems.includes(item)) {
@@ -37,14 +36,12 @@ export default function step9EmotionalImpacts() {
   };
 
   const handleContinue = async () => {
-    if (isContinueEnabled) {
-      try {
-        await AsyncStorage.setItem('step9EmotionalImpacts', JSON.stringify(selectedItems));
-        console.log('Saved to AsyncStorage: step9EmotionalImpacts - ', selectedItems);
-        router.push('/onboarding/step_10_long_term_impacts');
-      } catch (error) {
-        console.error('Error saving to AsyncStorage:', error);
-      }
+    try {
+      await AsyncStorage.setItem('step9EmotionalImpacts', JSON.stringify(selectedItems));
+      console.log('Saved to AsyncStorage: step9EmotionalImpacts - ', selectedItems);
+      router.push('/onboarding/step_10_long_term_impacts');
+    } catch (error) {
+      console.error('Error saving to AsyncStorage:', error);
     }
   };
 
@@ -90,12 +87,11 @@ export default function step9EmotionalImpacts() {
                 style={[
                   commonStyles.pillButton,
                   {
-                    backgroundColor: isContinueEnabled ? Colors[colorScheme].primary : Colors[colorScheme].border,
+                    backgroundColor: Colors[colorScheme].primary,
                     borderColor: textColor,
                   },
                 ]}
                 onPress={handleContinue}
-                disabled={!isContinueEnabled}
               >
                 <ThemedText
                   style={[
