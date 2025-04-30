@@ -31,15 +31,8 @@ export function useSuperwall() {
   const checkSubscription = async () => {
     console.log('[Superwall] Starting subscription check');
     try {
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Subscription check timed out')), 5000);
-      });
-      const status = await Promise.race([
-        superwallService.getSubscriptionStatus(),
-        timeoutPromise,
-      ]);
-      console.log('[Superwall] CheckSubscription: Status:', JSON.stringify(status));
-      setIsSubscribed(status === SubscriptionStatus.ACTIVE);
+      const status = await superwallService.getSubscriptionStatus();
+      setIsSubscribed(status === SubscriptionStatus.Active);
     } catch (error) {
       console.error('[Superwall] Hook subscription check failed:', error);
     } finally {
